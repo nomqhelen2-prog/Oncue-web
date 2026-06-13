@@ -8,7 +8,6 @@ function AboutPage() {
     <div className="bg-black text-white">
       <section className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-20">
-          <p className="text-xs uppercase tracking-[0.4em] text-white/50 mb-6">Company Profile / 2026</p>
           <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tight">About Us</h1>
         </div>
       </section>
@@ -21,10 +20,10 @@ function AboutPage() {
         </div>
         <div className="md:col-span-5 space-y-6 text-white/85 leading-relaxed text-[15px]">
           <p>
-            <span className="text-white font-bold">OnCue Marketing</span> is a dynamic experiential and promotional marketing agency, partnering with brands and event companies to deliver impactful, memorable brand experiences. We specialise in innovative campaign execution, strategic event activations, and professional staffing solutions that bring brands to life in meaningful ways.
+            <span className="text-white font-bold">OnCue Marketing</span> is a dynamic, experiential and promotional marketing agency partnering with brands and event companies to deliver impactful and memorable brand experiences. We specialise in innovative campaign execution, strategic event activations and professional staffing solutions that bring brands to life in meaningful ways.
           </p>
           <p>
-            From product launches and corporate events to in-store promotions and large-scale activations, OnCue Marketing provides tailored marketing support designed to enhance brand presence, engage audiences, and drive measurable impact.
+            From product launches and corporate events to in-store promotions and large-scale activations, OnCue Marketing provides tailored marketing support designed to enhance brand presence, engage audiences and drive measurable impact.
           </p>
           <p className="text-[var(--color-gold)] font-bold uppercase tracking-wider">
             At OnCue, we don't just execute campaigns — we create brand moments that resonate.

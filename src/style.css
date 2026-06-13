@@ -11,20 +11,6 @@
   --color-gold-deep: #d4a017;
 }
 
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -136,7 +122,7 @@
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
   --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
@@ -161,10 +147,20 @@
   }
 }
 
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+
 .hero.oncue-background {
   position: relative;
   overflow: hidden;
   width: 100%;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(1.5px);
+  z-index: 0;
 }
 
 .hero-image {
@@ -173,25 +169,44 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: 15% top;
   display: block;
   z-index: 0;
+  animation: hero-image-reveal 5s cubic-bezier(0, 0, 0.58, 1) both;
+}
+
+@media (min-width: 768px) {
+  .hero-image {
+    object-position: center top;
+  }
+}
+
+@keyframes hero-image-reveal {
+  from {
+    transform: scale(1.08);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .hero {
-  min-height: 120svh;
+  min-height: 110svh;
+  font-family: 'Montserrat', Arial, sans-serif;
   width: 100%;
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
-  padding: 0;
+  padding: 0px;
   position: relative;
   color: var(--off-white);
 }
 
 .hero-copy {
   width: 100%;
-  min-height: 120svh;
+  min-height: 110svh;
   padding: 40px 0 28px;
   text-align: center;
   display: flex;
@@ -220,6 +235,8 @@
   letter-spacing: -0.05em;
   color: var(--off-white);
   text-transform: uppercase;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
 }
 
 .hero-title-line {
@@ -243,10 +260,40 @@
   animation-delay: 120ms;
 }
 
+.hero-title-line:hover {
+  opacity: 1;
+}
+
 .hero-tagline {
   margin-top: auto;
   padding-top: 28px;
   z-index: 1;
+}
+
+.hero-logo {
+  max-width: min(520px, 80vw);
+  width: 100%;
+  object-fit: contain;
+  animation: pop-left-shadow 900ms cubic-bezier(0.2, 0.85, 0.2, 1) both;
+}
+
+/* Hero text — right-aligned, smaller */
+.hero-content--right {
+  justify-content: flex-end;
+  padding-right: 6vw;
+}
+
+.hero-title--right {
+  text-align: right;
+  opacity: 0.85;
+}
+
+.hero-title--right .hero-title-line-top {
+  font-size: clamp(1.8rem, 5vw, 4rem);
+}
+
+.hero-title--right .hero-title-line-bottom {
+  font-size: clamp(2.2rem, 6.5vw, 5.5rem);
 }
 
 @media (max-width: 640px) {
@@ -268,7 +315,7 @@
 
   .hero-copy {
     padding: 24px 0 20px;
-    min-height: 100svh;
+    min-height: 110svh;
   }
 
   .hero-title {
@@ -295,6 +342,18 @@
     font-size: clamp(0.95rem, 4vw, 1.15rem);
     letter-spacing: 0.16em;
   }
+
+  .hero-content--right {
+    padding-right: 1rem;
+  }
+
+  .hero-title--right .hero-title-line-top {
+    font-size: clamp(1.4rem, 8vw, 2.5rem);
+  }
+
+  .hero-title--right .hero-title-line-bottom {
+    font-size: clamp(1.8rem, 10vw, 3.2rem);
+  }
 }
 
 @keyframes pop-left-shadow {
@@ -309,4 +368,72 @@
     transform: translateX(0) translateY(0) scale(1);
     filter: blur(0);
   }
+}
+
+/* ── Brand Marquee ─────────────────────────────────────────────────────── */
+.brand-marquee-section {
+  background: #000;
+}
+
+.marquee-row {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 28s linear infinite;
+}
+
+.marquee-track--reverse {
+  animation: marquee-right 22s linear infinite;
+}
+
+.marquee-track--slow {
+  animation: marquee-left 38s linear infinite;
+}
+
+.marquee-inner {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.marquee-brand {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 0 1.5rem;
+  transition: color 0.2s;
+}
+
+.marquee-brand:hover {
+  color: var(--color-gold);
+}
+
+.marquee-dot {
+  color: var(--color-gold);
+  font-size: 1.2rem;
+  opacity: 0.5;
+}
+
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Scroll-driven image scale ──────────────────────────────────────────── */
+img[src*="/images/"],
+img[src*=".jpeg"],
+img[src*=".jpg"],
+img[src*=".JPG"] {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }

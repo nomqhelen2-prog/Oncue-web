@@ -1,13 +1,13 @@
-import { useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { Starburst } from "./Starburst";
+import { useState, useEffect, type ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Phone, Mail, Instagram } from "lucide-react";
 
 const nav = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/services", label: "Services" },
+  { href: "/",               label: "Home" },
+  { href: "/about",          label: "About" },
+  { href: "/services",       label: "Services" },
   { href: "/collaborations", label: "Collaborations" },
-  { href: "/contact", label: "Contact" },
+  { href: "/contact",        label: "Contact" },
 ] as const;
 
 interface SiteLayoutProps {
@@ -16,6 +16,27 @@ interface SiteLayoutProps {
 
 export function SiteLayout({ children }: SiteLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Scroll-driven image scale effect — re-runs on every route change
+  useEffect(() => {
+    const thresholds = Array.from({ length: 21 }, (_, i) => i / 20);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target as HTMLElement;
+          el.style.transform = `scale(${0.93 + entry.intersectionRatio * 0.07})`;
+        });
+      },
+      { threshold: thresholds }
+    );
+
+    const imgs = document.querySelectorAll<HTMLElement>(
+      'img[src*="/images/"], img[src*=".jpeg"], img[src*=".jpg"], img[src*=".JPG"]'
+    );
+    imgs.forEach((img) => observer.observe(img));
+    return () => observer.disconnect();
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -24,8 +45,18 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 group">
-            <Starburst className="w-6 h-6 text-white" />
-            <span className="font-black tracking-widest text-sm">ONCUE</span>
+            <img
+              src="/logoonly.png"
+              alt="OnCue Marketing"
+              className="w-6 h-6 object-contain"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+            <span
+              style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+              className="text-sm tracking-widest text-white"
+            >
+              OnCue <strong>MARKETING</strong>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -41,7 +72,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
             ))}
           </nav>
 
-          {/* Desktop CTA Button */}
+          {/* Desktop CTA */}
           <Link
             to="/contact"
             className="hidden md:inline-flex bg-[var(--color-gold)] text-black px-5 py-2 text-xs font-black uppercase tracking-widest hover:bg-[var(--color-gold-deep)] transition"
@@ -86,9 +117,19 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-10">
           {/* Brand Block */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <Starburst className="w-8 h-8 text-white" />
-              <span className="font-black tracking-widest text-white">ONCUE MARKETING</span>
+            <div className="flex items-center justify-start gap-3 mb-4">
+              <img
+                src="/logoonly.png"
+                alt="OnCue Marketing"
+                className="w-8 h-8 object-contain"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+              <span
+                style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+                className="font-black tracking-widest text-white"
+              >
+                OnCue <strong>MARKETING</strong>
+              </span>
             </div>
             <p className="text-sm max-w-md">
               Experiential and promotional marketing agency turning brand goals into shared wins across Johannesburg, Cape Town and Durban.
@@ -116,9 +157,37 @@ export function SiteLayout({ children }: SiteLayoutProps) {
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-white mb-4">Contact</p>
             <ul className="space-y-3 text-sm">
-              <li>+27 60 106 4358</li>
-              <li>admin@oncuemarketing.info</li>
-              <li>@oncuemarketing</li>
+              <li>
+                <a
+                  href="https://wa.me/27601064358"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-[var(--color-gold)] transition-colors"
+                >
+                  <Phone className="w-4 h-4 text-[var(--color-gold)]" />
+                  +27 60 106 4358
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:admin@oncuemarketing.info"
+                  className="flex items-center gap-2 hover:text-[var(--color-gold)] transition-colors"
+                >
+                  <Mail className="w-4 h-4 text-[var(--color-gold)]" />
+                  admin@oncuemarketing.info
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://instagram.com/oncuemarketing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-[var(--color-gold)] transition-colors"
+                >
+                  <Instagram className="w-4 h-4 text-[var(--color-gold)]" />
+                  @oncuemarketing
+                </a>
+              </li>
             </ul>
           </div>
         </div>
