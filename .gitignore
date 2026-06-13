@@ -20,37 +20,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-
-
-# Editor
-.vscode/
-.idea/
-
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-
-# OS
-.DS_Store
-Thumbs.db
-
-
-
 # Editor
 .vscode/
 .idea/
@@ -69,4 +38,3 @@ Thumbs.db
 
 # Vite
 vite.config.ts.timestamp-*
-
