@@ -37,7 +37,7 @@ dist-ssr
 # Editor
 .vscode/
 .idea/
->>>>>>> Stashed changes
+
 *.suo
 *.ntvs*
 *.njsproj
@@ -55,4 +55,4 @@ Thumbs.db
 
 # Vite
 vite.config.ts.timestamp-*
->>>>>>> Stashed changes
+
