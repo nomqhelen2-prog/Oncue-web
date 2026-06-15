@@ -43,7 +43,7 @@ export const images = {
     comfortFabricSoftener:"https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Comfort%20Fabric%20Softener.webp",
     patronFormula:        "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Patron%20x%20Formula%201.jpeg",
     patronPrivate:        "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Patron.webp",
-    homieBombay:          "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/IMG_2122.webp",
+    homieBombay:          "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Homie%20Lover%20Friend%20x%20Bombay%20Saphire.webp",
     tempo:                "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/tempo.webp",
   },
 } as const;

@@ -19,6 +19,33 @@ const schema = z.object({
   message: z.string().trim().min(1, "Message is required").max(2000),
 });
 
+// ─── Rate limiting: max 3 submissions per hour ────────────────────────────────
+const RATE_LIMIT_KEY   = "oncue_form_submissions";
+const RATE_LIMIT_MAX   = 3;
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in ms
+
+function checkRateLimit(): { allowed: boolean; waitMinutes?: number } {
+  const raw = localStorage.getItem(RATE_LIMIT_KEY);
+  const now = Date.now();
+  const timestamps: number[] = raw ? JSON.parse(raw) : [];
+
+  // Keep only submissions within the last hour
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW);
+
+  if (recent.length >= RATE_LIMIT_MAX) {
+    const oldest = Math.min(...recent);
+    const waitMs = RATE_LIMIT_WINDOW - (now - oldest);
+    const waitMinutes = Math.ceil(waitMs / 60000);
+    return { allowed: false, waitMinutes };
+  }
+
+  // Record this submission
+  recent.push(now);
+  localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(recent));
+  return { allowed: true };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function ContactPage() {
   const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm]     = useState({ name: "", email: "", message: "" });
@@ -28,6 +55,13 @@ function ContactPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Rate limit check
+    const { allowed, waitMinutes } = checkRateLimit();
+    if (!allowed) {
+      setError(`Too many submissions. Please wait ${waitMinutes} minute${waitMinutes === 1 ? "" : "s"} before trying again.`);
+      return;
+    }
 
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
