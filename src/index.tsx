@@ -122,6 +122,7 @@ function Index() {
               src={images.home.aboutImage}
               alt="OnCue Marketing team"
               className="w-full aspect-[4/3] object-cover object-center"
+              loading="lazy"
             />
           </div>
           <div className="md:col-span-6">
@@ -167,6 +168,7 @@ function Index() {
                     src={item.img}
                     alt={item.client}
                     className="w-full h-full object-contain object-top bg-black"
+                    loading="lazy"
                   />
                   <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-8 py-6">
                     <p className="text-[var(--color-gold)] text-xs font-bold uppercase tracking-widest mb-1">

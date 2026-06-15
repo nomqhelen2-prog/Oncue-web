@@ -35,14 +35,14 @@ function ServicesPage() {
           src={images.servicesBackground}
           alt="Premium event activation"
           className="absolute inset-0 w-full h-full object-cover opacity-30"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
         <Starburst className="absolute top-12 right-10 w-28 h-28 text-white hidden md:block" />
         <div className="relative max-w-7xl mx-auto px-6 py-24">
-          <p className="text-xs uppercase tracking-[0.4em] text-white/60 mb-6">Company Profile / 2026</p>
           <h1 className="text-4xl sm:text-5xl md:text-8xl font-black uppercase tracking-tight">Our Services</h1>
           <p className="mt-6 max-w-2xl text-white/80 text-lg">
-            OnCue Marketing delivers strategic experiential and promotional solutions designed to elevate brand visibility, engage audiences, and create memorable brand interactions.
+            OnCue Marketing delivers strategic experiential and promotional solutions designed to elevate brand visibility, engage audiences and create memorable brand interactions.
           </p>
         </div>
       </section>
@@ -66,7 +66,7 @@ function ServicesPage() {
           <article className="bg-black border border-white/15 rounded-none p-8 md:p-10 flex flex-col justify-center">
             <Starburst className="w-12 h-12 text-white mb-6 hidden md:block" />
             <p className="text-white/80 leading-relaxed">
-              We provide highly trained teams and seamless operational support, ensuring every activation is executed with{" "}
+              We provide highly trained teams and seamless operational support ensuring every activation is executed with{" "}
               <span className="text-[var(--color-gold)] font-bold">
                 precision, professionalism and measurable impact
               </span>

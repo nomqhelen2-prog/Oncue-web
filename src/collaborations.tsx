@@ -31,7 +31,7 @@ function CollabPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-6 pt-6 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-[400px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 auto-rows-[400px]">
           {collabs.map((c) => (
             <figure
               key={c.name}
@@ -47,6 +47,7 @@ function CollabPage() {
                 src={c.img}
                 alt={c.name}
                 className="w-full h-full object-cover object-[center_20%] transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
               <figcaption className="absolute bottom-6 left-6 text-white">

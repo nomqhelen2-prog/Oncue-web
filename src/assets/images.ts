@@ -13,7 +13,7 @@ export const images = {
     carousel: {
       slide1: img("Ayoosh Global Launch.jpeg"),   // Brand Activation
       slide2: img("D'usse X Ashmed Hour.jpeg"),    // Corporate Event
-      slide3: img("IMG_8964.jpeg"),                // Brand Activation — Patrón
+      slide3: img("IMG_8964.JPG"),                  // Brand Activation — Patrón
     },
   },
 
@@ -32,18 +32,18 @@ export const images = {
   // ── Contact page ─────────────────────────────────────────────────────────
   contact: img("Copy of 303.jpeg"),
   collaborations: {
-    nespresso:            img("Nespresso.jpeg"),
-    dusseAshmedHour:      img("D'usse X Ashmed Hour.jpeg"),
-    dusse:                img("DUSSE.jpeg"),
-    fnb:                  img("FNB.jpeg"),
-    luxeAwards:           img("Luxe Awards 2026.jpeg"),
-    rolex:                img("Rolex.jpeg"),
-    shakaIlembePremier:   img("Shaka Ilembe Premier.jpeg"),
-    ayooshGlobalLaunch:   img("Ayoosh Global Launch.jpeg"),
-    comfortFabricSoftener:img("Comfort Fabric Softener.jpeg"),
-    patronFormula:        img("Patron x Formula 1.jpeg"),
-    patronPrivate:        img("Patron.jpeg"),
-    homieBombay:          img("Homie Lover Friend x Bombay Saphire.jpeg"),
-    tempo:                img("tempo.JPG"),
+    nespresso:            img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Nespresso.webp"),
+    dusseAshmedHour:      img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/D%27usse%20X%20Ashmed%20Hour.jpeg"),
+    dusse:                img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/DUSSE.jpeg"),
+    fnb:                  img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/FNB.webp"),
+    luxeAwards:           img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Luxe%20Awards%202026.jpeg"),
+    rolex:                img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Rolex.webp"),
+    shakaIlembePremier:   img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Shaka%20Ilembe%20Premier.jpeg"),
+    ayooshGlobalLaunch:   img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Ayoosh%20Global%20Launch.webp"),
+    comfortFabricSoftener:img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Comfort%20Fabric%20Softener.webp"),
+    patronFormula:        img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Patron%20x%20Formula%201.jpeg"),
+    patronPrivate:        img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Patron.webp"),
+    homieBombay:          img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/IMG_2122.webp"),
+    tempo:                img("https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/tempo.webp"),
   },
 } as const;

@@ -25,7 +25,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       (entries) => {
         entries.forEach((entry) => {
           const el = entry.target as HTMLElement;
-          el.style.transform = `scale(${0.93 + entry.intersectionRatio * 0.07})`;
+          el.style.transform = `scale(${0.97 + entry.intersectionRatio * 0.03})`;
         });
       },
       { threshold: thresholds }
@@ -50,6 +50,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
               alt="OnCue Marketing"
               className="w-6 h-6 object-contain"
               style={{ filter: "brightness(0) invert(1)" }}
+              loading="lazy"
             />
             <span
               style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
@@ -123,6 +124,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                 alt="OnCue Marketing"
                 className="w-8 h-8 object-contain"
                 style={{ filter: "brightness(0) invert(1)" }}
+                loading="lazy"
               />
               <span
                 style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
