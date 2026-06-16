@@ -34,8 +34,64 @@
     <meta name="geo.region" content="ZA-GT" />
     <meta name="geo.placename" content="Johannesburg, South Africa" />
 
+    <!-- Theme color (mobile browser chrome) -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Preconnect for faster font loading (helps page speed score) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://sjqncrtrprldnmfg.public.blob.vercel-storage.com" crossorigin />
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@700;900&family=Playfair+Display:ital,wght@0,700;1,400&family=Bebas+Neue&family=Montserrat:wght@400;700;900&family=Raleway:wght@300;700&family=Nunito:wght@400;700&family=Libre+Baskerville:ital,wght@0,700;1,400&display=swap" rel="stylesheet" />
+
+    <!-- JSON-LD Structured Data — tells Google exactly what OnCue Marketing is -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "MarketingAgency",
+          "@id": "https://oncuemarketing.co.za/#organization",
+          "name": "OnCue Marketing",
+          "url": "https://oncuemarketing.co.za/",
+          "logo": "https://oncuemarketing.co.za/logoonly.png",
+          "image": "https://oncuemarketing.co.za/images/background2.png",
+          "description": "OnCue Marketing is a dynamic experiential and promotional marketing agency delivering impactful brand activations, product launches, and professional promotional staffing across South Africa.",
+          "telephone": "+27601064358",
+          "email": "admin@oncuemarketing.info",
+          "sameAs": ["https://instagram.com/oncuemarketing"],
+          "areaServed": [
+            { "@type": "City", "name": "Johannesburg" },
+            { "@type": "City", "name": "Cape Town" },
+            { "@type": "City", "name": "Durban" }
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "ZA",
+            "addressRegion": "Gauteng"
+          },
+          "serviceType": [
+            "Experiential Marketing",
+            "Brand Activations",
+            "Promotional Staffing",
+            "Brand Ambassadors",
+            "Product Launches",
+            "Corporate Events",
+            "In-Store Activations"
+          ],
+          "priceRange": "$$"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://oncuemarketing.co.za/#website",
+          "url": "https://oncuemarketing.co.za/",
+          "name": "OnCue Marketing",
+          "publisher": { "@id": "https://oncuemarketing.co.za/#organization" }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="app"></div>
