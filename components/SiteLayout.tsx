@@ -172,7 +172,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                   className="flex items-center gap-2 hover:text-[var(--color-gold)] transition-colors"
                 >
                   <MessageCircle className="w-4 h-4 text-[var(--color-gold)]" />
-                  WhatsApp
+                  +27 60 106 4358
                 </a>
               </li>
               <li>
