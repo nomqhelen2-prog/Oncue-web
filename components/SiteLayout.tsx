@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Phone, Mail, Instagram } from "lucide-react";
+import { Mail, Instagram, MessageCircle } from "lucide-react";
 
 const nav = [
   { href: "/",               label: "Home" },
@@ -17,6 +17,11 @@ interface SiteLayoutProps {
 export function SiteLayout({ children }: SiteLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  // Scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [location.pathname]);
 
   // Scroll-driven image scale effect — re-runs on every route change
   useEffect(() => {
@@ -78,7 +83,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
             to="/contact"
             className="hidden md:inline-flex bg-[var(--color-gold)] text-black px-5 py-2 text-xs font-black uppercase tracking-widest hover:bg-[var(--color-gold-deep)] transition"
           >
-            Start a project
+            Connect With Us
           </Link>
 
           {/* Mobile Menu Button */}
@@ -134,7 +139,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
               </span>
             </div>
             <p className="text-sm max-w-md">
-              Experiential and promotional marketing agency turning brand goals into shared wins across Johannesburg, Cape Town and Durban.
+              Experiential and Promotional Marketing agency: turning brand goals into shared wins across Johannesburg, Cape Town and Durban.
             </p>
           </div>
 
@@ -159,15 +164,15 @@ export function SiteLayout({ children }: SiteLayoutProps) {
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-white mb-4">Contact</p>
             <ul className="space-y-3 text-sm">
-              <li>
+<li>
                 <a
                   href="https://wa.me/27601064358"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-[var(--color-gold)] transition-colors"
                 >
-                  <Phone className="w-4 h-4 text-[var(--color-gold)]" />
-                  +27 60 106 4358
+                  <MessageCircle className="w-4 h-4 text-[var(--color-gold)]" />
+                  WhatsApp
                 </a>
               </li>
               <li>

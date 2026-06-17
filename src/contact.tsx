@@ -102,7 +102,7 @@ function ContactPage() {
               Let's <br />Work <br />
               <span className="text-[var(--color-gold)]">Together</span>
             </h1>
-            <Starburst className="absolute -bottom-6 left-1/2 w-20 h-20 text-white/80 hidden md:block" />
+            <Starburst className="absolute -top-6 right-0 w-16 h-16 text-white/80 hidden md:block" />
           </div>
           <div className="md:col-span-5 relative">
             <img
@@ -148,7 +148,7 @@ function ContactPage() {
           className="md:col-span-7 border border-white/15 p-8 md:p-10 space-y-6"
         >
           <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wide leading-tight break-words">
-            Send us a brief
+            Connect With Us
           </h2>
 
           <div>

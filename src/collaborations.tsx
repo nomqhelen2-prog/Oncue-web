@@ -3,18 +3,18 @@ import { images } from "./assets/images";
 export default CollabPage;
 
 const collabs = [
-  { name: "Rolex",                   tag: "Luxury Retail",       img: images.collaborations.rolex,                type: "portrait" },
-  { name: "Nespresso",               tag: "In-store Sampling",   img: images.collaborations.nespresso,            type: "portrait" },
-  { name: "D'Ussé x Ashmed Hour",    tag: "Brand Activation",    img: images.collaborations.dusseAshmedHour,      type: "portrait" },
+  { name: "Rolex",                   tag: "Luxury Brand Launches",       img: images.collaborations.rolex,                type: "portrait" },
+  { name: "Nespresso",               tag: "Corporate Year Ends",   img: images.collaborations.nespresso,            type: "portrait" },
+  { name: "D'Ussé x Ashmed Hour",    tag: "Experiential Lifestyle Events",    img: images.collaborations.dusseAshmedHour,      type: "portrait" },
   
- { name: "D'Ussé",                  tag: "Instore Activations", img: images.collaborations.dusse },
- { name: "FNB",                     tag: "Corporate",           img: images.collaborations.fnb },
-  {name: "Private Patrón Masterclass", tag: "Intimate Activation", img: images.collaborations.patronPrivate,     type: "portrait" },
-   { name: "Luxe Awards 2026",        tag: "Awards Hospitality",  img: images.collaborations.luxeAwards,          type: "medium" },
-  { name: "Tempo",                     tag: "Corporate",           img: images.collaborations.tempo, type: "portrait" },
-  { name: "Patrón x Formula 1",      tag: "Luxury Spirits",      img: images.collaborations.patronFormula },
-  { name: "Homie Lover Friend",       tag: "Lifestyle Campaign",  img: images.collaborations.homieBombay,         type: "portrait" },
-  { name: "Comfort Fabric Softener", tag: "Product Launch",      img: images.collaborations.comfortFabricSoftener, type: "portrait" },
+ { name: "D'Ussé",                  tag: "Brand Activation", img: images.collaborations.dusse },
+ { name: "FNB",                     tag: "Corporate Gatherings",           img: images.collaborations.fnb },
+  {name: "Private Patrón Masterclass", tag: "Intimate Brand Events", img: images.collaborations.patronPrivate,     type: "portrait" },
+   { name: "Luxe Awards 2026",        tag: "Hospitality Awards",  img: images.collaborations.luxeAwards,          type: "medium" },
+  { name: "Tempo",                     tag: "Corporate Gatherings",           img: images.collaborations.tempo, type: "portrait" },
+  { name: "Patrón x Formula 1",      tag: "Watch Party",      img: images.collaborations.patronFormula },
+  { name: "Homie Lover Friend x Bombay",       tag: "Lifestyle Events",  img: images.collaborations.homieBombay,         type: "portrait" },
+  { name: "Comfort", tag: " Influencer Party",      img: images.collaborations.comfortFabricSoftener, type: "portrait" },
   { name: "Shaka Ilembe",            tag: "Film Premier",        img: images.collaborations.shakaIlembePremier,  type: "portrait" },
   { name: "Ayoosh Global",           tag: "Product Launch",      img: images.collaborations.ayooshGlobalLaunch,  type: "medium" },
 ];

@@ -33,8 +33,8 @@ function AboutPage() {
 
       <section className="max-w-7xl mx-auto px-6 py-24 grid md:grid-cols-12 gap-10">
         <div className="md:col-span-7 grid grid-cols-2 gap-4">
-          <img src={images.about.img1403} alt="" className="w-full aspect-square object-cover" loading="lazy" />
           <img src={images.about.img8975} alt="Corporate brand experience" className="w-full aspect-square object-cover" loading="lazy" />
+          <img src={images.about.img1403} alt="" className="w-full aspect-square object-cover" loading="lazy" />
           <img src={images.about.activation} alt="Event activation" className="col-span-2 w-full aspect-[16/9] object-cover" loading="lazy" />
         </div>
         <div className="md:col-span-5 border border-white/15 p-8 md:p-10">

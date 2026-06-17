@@ -6,9 +6,9 @@ import { images } from "./assets/images";
 export default Index;
 
 const portfolioItems = [
-  { img: images.home.carousel.slide1, label: "Brand Activation", client: "Ayoosh Global Launch" },
-  { img: images.home.carousel.slide2, label: "Corporate Event",  client: "D'Ussé × Ashmed Hour" },
-  { img: images.home.carousel.slide3, label: "Brand Activation", client: "Patrón Tequila"       },
+  { img: images.home.carousel.slide1, label: "Product Launch", client: "Ayoosh Global Launch" },
+  { img: images.home.carousel.slide2, label: "Lifestyle Events",  client: "D'Ussé × Ashmed Hour" },
+  { img: images.home.carousel.slide3, label: "Product Launch", client: "Patrón Tequila"       },
 ];
 
 const brandsRow1 = [
