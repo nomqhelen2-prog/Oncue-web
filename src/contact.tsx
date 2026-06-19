@@ -129,7 +129,7 @@ function ContactPage() {
               <div className="flex items-start gap-4">
                 <ArrowUpRight className="w-5 h-5 text-[var(--color-gold)] mt-1 group-hover:translate-x-1 group-hover:-translate-y-1 transition" />
                 <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-widest text-white/50 mb-1 flex items-center gap-2">
+                  <p className="text-xs uppercase tracking-widest text-white/75 mb-1 flex items-center gap-2">
                     <c.icon className="w-3.5 h-3.5" /> {c.label}
                   </p>
                   <p className="text-lg sm:text-xl font-bold group-hover:text-[var(--color-gold)] transition break-words">
@@ -152,7 +152,7 @@ function ContactPage() {
           </h2>
 
           <div>
-            <label className="block text-xs uppercase tracking-widest text-white/60 mb-2">Name</label>
+            <label className="block text-xs uppercase tracking-widest text-white/80 mb-2">Name</label>
             <input
               required
               name="from_name"
@@ -165,7 +165,7 @@ function ContactPage() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-widest text-white/60 mb-2">Email</label>
+            <label className="block text-xs uppercase tracking-widest text-white/80 mb-2">Email</label>
             <input
               required
               type="email"
@@ -179,7 +179,7 @@ function ContactPage() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-widest text-white/60 mb-2">Message</label>
+            <label className="block text-xs uppercase tracking-widest text-white/80 mb-2">Message</label>
             <textarea
               required
               name="message"

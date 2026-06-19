@@ -8,7 +8,7 @@ export default Index;
 const portfolioItems = [
   { img: images.home.carousel.slide1, label: "Product Launch", client: "Ayoosh Global Launch" },
   { img: images.home.carousel.slide2, label: "Lifestyle Events",  client: "D'Ussé × Ashmed Hour" },
-  { img: images.home.carousel.slide3, label: "Product Launch", client: "Patrón Tequila"       },
+  { img: images.home.carousel.slide3, label: "Product Launch", client: "Patrón EL Alto"       },
 ];
 
 const brandsRow1 = [
@@ -19,7 +19,6 @@ const brandsRow1 = [
   { name: "FNB",     font: "'Bebas Neue', sans-serif" },
   { name: "AYOOSH",  font: "'Raleway', sans-serif" },
   { name: "COMFORT", font: "'Nunito', sans-serif" },
-  { name: "TEMPO",   font: "'Montserrat', sans-serif" },
 ];
 
 const brandsRow2 = [
@@ -28,7 +27,7 @@ const brandsRow2 = [
   { name: "SHAKA ILEMBE",        font: "'Cinzel', serif" },
   { name: "LUXE AWARDS",         font: "'Libre Baskerville', serif" },
   { name: "FORMULA 1",           font: "'Bebas Neue', sans-serif" },
-  { name: "ONCUE MARKETING",     font: "'Montserrat', sans-serif" },
+  { name: "MAXHOSA KULTURE FESTIVAL",     font: "'Montserrat', sans-serif" },
 ];
 
 const brandsRow3 = [
@@ -104,13 +103,13 @@ function Index() {
         />
         <div className="hero-overlay" />
         <div className="hero-copy">
-          <div className="hero-content hero-content--right">
-            <h1 className="hero-title hero-title--right" aria-label="OnCue Marketing">
+          <div className="hero-content">
+            <h1 className="hero-title" aria-label="OnCue Marketing">
               <span className="hero-title-line hero-title-line-top">OnCue</span>
               <span className="hero-title-line hero-title-line-bottom">MARKETING</span>
             </h1>
           </div>
-          <p className="tagline hero-tagline">TURNING YOUR BRAND GOALS INTO SHARED WINS</p>
+          <p className="tagline hero-tagline">STRATEGIC MARKETING. EXCEPTIONAL EXECUTION.</p>
         </div>
       </section>
 
@@ -201,15 +200,18 @@ function Index() {
         </div>
 
         {/* Dot indicators */}
-        <div className="flex justify-center gap-3 mt-6">
+        <div className="flex justify-center gap-1 mt-6">
           {portfolioItems.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              aria-label={`Go to slide ${idx + 1}`}
+              className="flex items-center justify-center w-11 h-11"
+            >
+              <span className={`block h-2 rounded-full transition-all duration-300 ${
                 idx === currentIndex ? "bg-[var(--color-gold)] w-6" : "bg-white/30 w-2"
-              }`}
-            />
+              }`} />
+            </button>
           ))}
         </div>
 

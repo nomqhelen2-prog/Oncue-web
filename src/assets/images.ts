@@ -4,7 +4,7 @@ export const images = {
   // ── Homepage sections ────────────────────────────────────────────────────
   home: {
     // Main hero background (full-screen image behind the title)
-    heroBackground: img("background2.png"),
+    heroBackground: img("Oncue homepage background.png"),
 
     // "Who we are" about section image
     aboutImage: img("IMG_2122.jpeg"),
@@ -44,6 +44,7 @@ export const images = {
     patronFormula:        "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Patron%20x%20Formula%201.jpeg",
     patronPrivate:        "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Patron.webp",
     homieBombay:          "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Homie%20Lover%20Friend%20x%20Bombay%20Saphire.webp",
-    tempo:                "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/tempo.webp",
+    maxhosaKultureFestival:"https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Maxhosa%20Kulture%20Festival.webp",
+    dusse2:                "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Dusse%20Instore%20Activation.webp",
   },
 } as const;

@@ -9,14 +9,16 @@ const collabs = [
   
  { name: "D'Ussé",                  tag: "Brand Activation", img: images.collaborations.dusse },
  { name: "FNB",                     tag: "Corporate Gatherings",           img: images.collaborations.fnb },
-  {name: "Private Patrón Masterclass", tag: "Intimate Brand Events", img: images.collaborations.patronPrivate,     type: "portrait" },
+  { name: "Patron El Alto", tag: "Intimate Brand Events", img: images.collaborations.patronPrivate, type: "portrait" },
    { name: "Luxe Awards 2026",        tag: "Hospitality Awards",  img: images.collaborations.luxeAwards,          type: "medium" },
-  { name: "Tempo",                     tag: "Corporate Gatherings",           img: images.collaborations.tempo, type: "portrait" },
+
   { name: "Patrón x Formula 1",      tag: "Watch Party",      img: images.collaborations.patronFormula },
   { name: "Homie Lover Friend x Bombay",       tag: "Lifestyle Events",  img: images.collaborations.homieBombay,         type: "portrait" },
   { name: "Comfort", tag: " Influencer Party",      img: images.collaborations.comfortFabricSoftener, type: "portrait" },
   { name: "Shaka Ilembe",            tag: "Film Premier",        img: images.collaborations.shakaIlembePremier,  type: "portrait" },
   { name: "Ayoosh Global",           tag: "Product Launch",      img: images.collaborations.ayooshGlobalLaunch,  type: "medium" },
+  { name: "Maxhosa Kulture Festival", tag: "Festival",  img: images.collaborations.maxhosaKultureFestival, type: "portrait" },
+  { name: "D'Ussé In-Store",         tag: "Brand Activation",    img: images.collaborations.dusse2, type: "portrait" },
 ];
 
 function CollabPage() {

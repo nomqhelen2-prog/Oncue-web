@@ -4,9 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from "path";
 
 export default defineConfig({
-  plugins: [react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./"),
@@ -14,5 +12,16 @@ export default defineConfig({
   },
   server: {
     host: true,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          emailjs: ["@emailjs/browser"],
+          ui: ["lucide-react", "zod"],
+        },
+      },
+    },
   },
 });
