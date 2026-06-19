@@ -18,7 +18,7 @@ const collabs = [
   { name: "Shaka Ilembe",            tag: "Film Premier",        img: images.collaborations.shakaIlembePremier,  type: "portrait" },
   { name: "Ayoosh Global",           tag: "Product Launch",      img: images.collaborations.ayooshGlobalLaunch,  type: "medium" },
   { name: "Maxhosa Kulture Festival", tag: "Festival",  img: images.collaborations.maxhosaKultureFestival, type: "portrait" },
-  { name: "D'Ussé In-Store",         tag: "Brand Activation",    img: images.collaborations.dusse2, type: "portrait" },
+  { name: "D'Ussé",         tag: "In-Store Activation",    img: images.collaborations.dusse2, type: "portrait" },
 ];
 
 function CollabPage() {
