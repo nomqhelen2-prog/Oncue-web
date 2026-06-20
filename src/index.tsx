@@ -109,9 +109,10 @@ function Index() {
               <span className="hero-title-line hero-title-line-bottom">MARKETING</span>
             </h1>
           </div>
-          <p className="tagline hero-tagline">STRATEGIC MARKETING. EXCEPTIONAL EXECUTION.</p>
+          <p className="tagline hero-tagline hidden-mobile">STRATEGIC MARKETING. EXCEPTIONAL EXECUTION.</p>
         </div>
       </section>
+      <p className="tagline hero-tagline mobile-only-tagline">STRATEGIC MARKETING. EXCEPTIONAL EXECUTION.</p>
 
       {/* ── About Section ── */}
       <section id="home-overview" className="panel max-w-7xl mx-auto py-24 px-6 border-b border-white/10">
@@ -151,7 +152,7 @@ function Index() {
         </div>
 
         <div
-          className="relative"
+          className="relative overflow-hidden"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
@@ -185,7 +186,7 @@ function Index() {
           {/* Prev arrow */}
           <button
             onClick={() => { prev(); setPaused(false); }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black transition"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black transition"
           >
             <ChevronLeft size={28} />
           </button>
@@ -193,7 +194,7 @@ function Index() {
           {/* Next arrow */}
           <button
             onClick={() => { next(); setPaused(false); }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black transition"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black transition"
           >
             <ChevronRight size={28} />
           </button>

@@ -47,7 +47,9 @@ export function SiteLayout({ children }: SiteLayoutProps) {
     const imgs = document.querySelectorAll<HTMLElement>(
       'img[src*="/images/"], img[src*=".jpeg"], img[src*=".jpg"], img[src*=".JPG"]'
     );
-    imgs.forEach((img) => observer.observe(img));
+    imgs.forEach((img) => {
+      if (!img.classList.contains('hero-image')) observer.observe(img);
+    });
     return () => observer.disconnect();
   }, [location.pathname]);
 
