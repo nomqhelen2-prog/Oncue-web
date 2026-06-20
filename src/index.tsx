@@ -100,6 +100,10 @@ function Index() {
           src={images.home.heroBackground}
           alt=""
           aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
+          width="1920"
+          height="1080"
         />
         <div className="hero-overlay" />
         <div className="hero-copy">
@@ -186,6 +190,7 @@ function Index() {
           {/* Prev arrow */}
           <button
             onClick={() => { prev(); setPaused(false); }}
+            aria-label="Previous slide"
             className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black transition"
           >
             <ChevronLeft size={28} />
@@ -194,6 +199,7 @@ function Index() {
           {/* Next arrow */}
           <button
             onClick={() => { next(); setPaused(false); }}
+            aria-label="Next slide"
             className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black transition"
           >
             <ChevronRight size={28} />

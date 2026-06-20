@@ -210,7 +210,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         </div>
 
         {/* Footer Bottom */}
-        <div className="border-t border-white/10 py-6 text-center text-xs uppercase tracking-widest text-white/40">
+        <div className="border-t border-white/10 py-6 text-center text-xs uppercase tracking-widest text-white/60">
           © {new Date().getFullYear()} OnCue Marketing — JHB | CPT | DBN
         </div>
       </footer>

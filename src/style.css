@@ -399,13 +399,11 @@
   from {
     opacity: 0;
     transform: translateX(-1rem) translateY(0.75rem) scale(0.985);
-    filter: blur(3px);
   }
 
   to {
     opacity: 1;
     transform: translateX(0) translateY(0) scale(1);
-    filter: blur(0);
   }
 }
 
