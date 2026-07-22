@@ -1,6 +1,47 @@
+import { useState } from "react";
 import { images } from "./assets/images";
 
 export default CollabPage;
+
+const W = "https://commons.wikimedia.org/wiki/Special:FilePath/";
+
+const brandLogos = [
+  { name: "Rolex",           logo: `${W}Rolex_wordmark_logo.svg` },
+  { name: "Nespresso",       logo: `${W}Nespresso_logo_(wordmark).svg` },
+  { name: "D'Ussé",          logo: "https://logo.clearbit.com/dusse.com" },
+  { name: "FNB",             logo: "https://logo.clearbit.com/fnb.co.za" },
+  { name: "Patrón",          logo: "https://logo.clearbit.com/patrontequila.com" },
+  { name: "Formula 1",       logo: `${W}Formula_One_logo.svg` },
+  { name: "Bombay Sapphire", logo: "https://logo.clearbit.com/bombaysapphire.com" },
+  { name: "Comfort",         logo: `${W}Comfort_(fabric_softener)_logo.svg` },
+  { name: "Ayoosh",          logo: "https://logo.clearbit.com/ayoosh.co.za" },
+  { name: "Maxhosa",         logo: "https://logo.clearbit.com/maxhosa.co.za" },
+  { name: "Shaka Ilembe",    logo: null },
+  { name: "Luxe Awards",     logo: null },
+];
+
+function LogoCell({ name, logo }: { name: string; logo: string | null }) {
+  const [failed, setFailed] = useState(false);
+  const initials = name.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 3);
+  return (
+    <div className="aspect-square border border-white/10 flex items-center justify-center p-5 bg-white/5">
+      {logo && !failed ? (
+        <img
+          src={logo}
+          alt={name}
+          className="w-full h-full object-contain"
+          style={{ filter: "brightness(0) invert(1)" }}
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className="text-[var(--color-gold)] font-black text-lg tracking-widest text-center leading-tight">
+          {initials}
+        </span>
+      )}
+    </div>
+  );
+}
 
 const collabs = [
   { name: "Rolex",                   tag: "Luxury Brand Launches",       img: images.collaborations.rolex,                type: "portrait" },
@@ -9,7 +50,7 @@ const collabs = [
   
  { name: "D'Ussé",                  tag: "Brand Activation", img: images.collaborations.dusse },
  { name: "FNB",                     tag: "Corporate Gatherings",           img: images.collaborations.fnb },
-  { name: "Patron El Alto", tag: "Intimate Brand Events", img: images.collaborations.patronPrivate, type: "portrait" },
+  { name: "Patrón", tag: "Intimate Brand Events", img: images.collaborations.patronPrivate, type: "portrait" },
    { name: "Luxe Awards 2026",        tag: "Hospitality Awards",  img: images.collaborations.luxeAwards,          type: "medium" },
 
   { name: "Patrón x Formula 1",      tag: "Watch Party",      img: images.collaborations.patronFormula },
@@ -61,6 +102,15 @@ function CollabPage() {
                 )}
               </figcaption>
             </figure>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Brand Logo Grid ── */}
+      <section className="max-w-7xl mx-auto px-6 pb-24 border-t border-white/10 pt-12">
+        <div className="grid grid-cols-4 gap-px bg-white/10">
+          {brandLogos.map((b) => (
+            <LogoCell key={b.name} name={b.name} logo={b.logo} />
           ))}
         </div>
       </section>
