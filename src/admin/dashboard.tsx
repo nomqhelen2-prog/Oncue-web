@@ -33,7 +33,7 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
     setSavingNotes(false);
   }
 
-  const rows: [string, string][] = [
+  const rows = ([
     ["Email", inv.email],
     ["WhatsApp", inv.whatsapp],
     ["Bank", inv.bank_name],
@@ -59,7 +59,7 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
     ["Total Owed", fmt(inv.total_owed)],
     ["Submission Date", fmtDate(inv.submission_date)],
     ["Agreed to T&Cs", inv.agreed_to_terms ? "Yes" : "No"],
-  ].filter(([k]) => k);
+  ] as [string, string][]).filter(([k]) => k);
 
   // Add per-day rows
   const dayRows: [string, string][] = [];
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
           <div className="border border-white/10 overflow-hidden">
             {/* Table header */}
             <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] border-b border-white/10 bg-white/5">
-              {["Name", "Group / Job", "Job Type", "Submitted", "Total Owed", "Status"].map((h, i) => (
+              {["Name", "Group / Job", "Job Type", "Submitted", "Total Owed", "Status"].map((h) => (
                 <div key={h} className="px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
                   {h === "Submitted" ? (
                     <button onClick={() => setSortDesc(!sortDesc)} className="flex items-center gap-1 hover:text-white transition">

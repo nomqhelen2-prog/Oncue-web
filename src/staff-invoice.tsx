@@ -151,7 +151,7 @@ function calcLabour(data: FormData): string {
 
 // ── UI atoms ──────────────────────────────────────────────────────────────
 function StepLayout({ title, subtitle, children }: {
-  title: string; subtitle?: React.ReactNode; children: React.ReactNode;
+  title: string; subtitle?: React.ReactNode; children?: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[340px] text-center px-2">
