@@ -127,6 +127,7 @@ function Index() {
               alt="OnCue Marketing team"
               className="w-full aspect-[4/3] object-cover object-center"
               loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="md:col-span-6">
@@ -173,6 +174,7 @@ function Index() {
                     alt={item.client}
                     className="w-full h-full object-contain object-top bg-black"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-8 py-6">
                     <p className="text-[var(--color-gold)] text-xs font-bold uppercase tracking-widest mb-1">
@@ -241,12 +243,12 @@ function Index() {
           <p className="text-white text-lg mb-8">
             Partner with us | Join our promoter team
           </p>
-          <Link
-            to="/contact"
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("oncue:open-modal"))}
             className="inline-block bg-[var(--color-gold)] text-black px-8 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition"
           >
             Contact Us Now
-          </Link>
+          </button>
         </div>
       </section>
 

@@ -35,7 +35,9 @@ function ServicesPage() {
           src={images.servicesBackground}
           alt="Premium event activation"
           className="absolute inset-0 w-full h-full object-cover opacity-30"
-          loading="lazy"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
         <Starburst className="absolute top-12 right-10 w-28 h-28 text-white hidden md:block" />

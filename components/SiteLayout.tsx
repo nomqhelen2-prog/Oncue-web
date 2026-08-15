@@ -1,5 +1,6 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { EnquiryModal } from "../src/components/EnquiryModal";
 import { Mail, Instagram } from "lucide-react";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -24,7 +25,14 @@ interface SiteLayoutProps {
 
 export function SiteLayout({ children }: SiteLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const handler = () => setModalOpen(true);
+    window.addEventListener("oncue:open-modal", handler);
+    return () => window.removeEventListener("oncue:open-modal", handler);
+  }, []);
 
   // Scroll to top on every route change
   useEffect(() => {
@@ -65,7 +73,8 @@ export function SiteLayout({ children }: SiteLayoutProps) {
               alt="OnCue Marketing"
               className="w-6 h-6 object-contain"
               style={{ filter: "brightness(0) invert(1)" }}
-              loading="lazy"
+              loading="eager"
+              fetchPriority="high"
             />
             <span
               style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
@@ -89,12 +98,12 @@ export function SiteLayout({ children }: SiteLayoutProps) {
           </nav>
 
           {/* Desktop CTA */}
-          <Link
-            to="/contact"
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("oncue:open-modal"))}
             className="hidden md:inline-flex bg-[var(--color-gold)] text-black px-5 py-2 text-xs font-black uppercase tracking-widest hover:bg-[var(--color-gold-deep)] transition"
           >
             Connect With Us
-          </Link>
+          </button>
 
           {/* Mobile Menu Button */}
           <button
@@ -127,6 +136,8 @@ export function SiteLayout({ children }: SiteLayoutProps) {
 
       {/* Main Content */}
       <main className="pt-16">{children}</main>
+
+      {modalOpen && <EnquiryModal onClose={() => setModalOpen(false)} />}
 
       {/* Footer */}
       <footer className="border-t border-white/10 bg-black text-white/85">
@@ -210,8 +221,12 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         </div>
 
         {/* Footer Bottom */}
-        <div className="border-t border-white/10 py-6 text-center text-xs uppercase tracking-widest text-white/60">
-          © {new Date().getFullYear()} OnCue Marketing — JHB | CPT | DBN
+        <div className="border-t border-white/10 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs uppercase tracking-widest text-white/60">
+          <span>© {new Date().getFullYear()} OnCue Marketing — JHB | CPT | DBN</span>
+          <div className="flex items-center gap-6">
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
+          </div>
         </div>
       </footer>
     </div>

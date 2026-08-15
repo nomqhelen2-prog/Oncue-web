@@ -110,6 +110,7 @@ function ContactPage() {
               alt="Brand activation celebration"
               className="w-full aspect-[4/5] object-cover"
               loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
