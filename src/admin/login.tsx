@@ -24,7 +24,14 @@ export default function AdminLogin() {
     setError("");
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) {
-      setError(error.message);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("fetch") || msg.includes("network") || msg.includes("load")) {
+        setError("Couldn't reach the server — check your connection and try again.");
+      } else if (msg.includes("invalid") || msg.includes("credentials") || msg.includes("password")) {
+        setError("Incorrect email or password.");
+      } else {
+        setError("Something went wrong. Please try again later.");
+      }
       setLoading(false);
     } else {
       navigate("/admin");

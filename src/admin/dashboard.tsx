@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase, type Invoice } from "../lib/supabase";
 import { LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X } from "lucide-react";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// ── helpers ───────────────────────────────────────────────────────────────────
 function fmt(n: number | null) {
   if (n == null) return "—";
   return `R ${n.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -44,9 +44,9 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
     ["WhatsApp Group", inv.whatsapp_group],
     ["Job Type", inv.job_type],
     ["Days Worked", inv.days_worked],
-    inv.daily_rate ? ["Daily Rate", fmt(inv.daily_rate)] : ["", ""],
-    inv.fixed_rate ? ["Fixed Rate", fmt(inv.fixed_rate)] : ["", ""],
-    inv.setup_rate ? ["Setup Rate", fmt(inv.setup_rate)] : ["", ""],
+    inv.daily_rate   ? ["Daily Rate", fmt(inv.daily_rate)]   : ["", ""],
+    inv.fixed_rate   ? ["Fixed Rate", fmt(inv.fixed_rate)]   : ["", ""],
+    inv.setup_rate   ? ["Setup Rate", fmt(inv.setup_rate)]   : ["", ""],
     ["Stores Worked", inv.stores_worked],
     ["Labour Total", fmt(inv.labour_total)],
     ["Bought Items", inv.bought_items],
@@ -61,7 +61,6 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
     ["Agreed to T&Cs", inv.agreed_to_terms ? "Yes" : "No"],
   ] as [string, string][]).filter(([k]) => k);
 
-  // Add per-day rows
   const dayRows: [string, string][] = [];
   for (let i = 1; i <= 7; i++) {
     const h = inv[`day_${i}_hours` as keyof Invoice] as number | null;
@@ -78,58 +77,48 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
             <h2 className="text-xl font-black uppercase tracking-tight text-white">
               {inv.first_name} {inv.last_name}
             </h2>
-            <p className="text-white/40 text-xs mt-1">{fmtDate(inv.submission_date)}</p>
+            <p className="text-white/60 text-xs mt-1">{fmtDate(inv.submission_date)}</p>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition">
+          <button onClick={onClose} className="text-white/60 hover:text-white transition">
             <X size={18} />
           </button>
         </div>
 
-        {/* Paid toggle */}
         <button
           onClick={() => onTogglePaid(inv.id, !inv.paid)}
           className={`w-full py-3 font-black uppercase tracking-widest text-sm transition ${
             inv.paid
-              ? "bg-white/10 text-white/60 hover:bg-white/15"
+              ? "bg-white/10 text-white hover:bg-white/20"
               : "bg-[var(--color-gold)] text-black hover:bg-white"
           }`}
         >
           {inv.paid ? "✓ Paid — Mark as Unpaid" : "Mark as Paid"}
         </button>
 
-        {/* Details */}
-        <div className="space-y-0 border border-white/10">
-          {rows.map(([k, v]) => v ? (
-            <div key={k} className="flex justify-between gap-4 px-4 py-2.5 border-b border-white/5 last:border-0">
-              <span className="text-[11px] uppercase tracking-widest text-white/40 flex-shrink-0">{k}</span>
-              <span className="text-sm text-white text-right">{v}</span>
+        <div className="border border-white/10">
+          {[...rows, ...dayRows].map(([k, v], idx) => v ? (
+            <div key={k} className={`flex justify-between gap-4 px-4 py-2.5 border-b border-white/5 last:border-0 ${idx % 2 === 0 ? "bg-white/[0.03]" : ""}`}>
+              <span className="text-[11px] uppercase tracking-widest text-white/70 flex-shrink-0">{k}</span>
+              <span className="text-sm text-white text-right font-medium">{v}</span>
             </div>
           ) : null)}
-          {dayRows.map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-4 px-4 py-2.5 border-b border-white/5 last:border-0">
-              <span className="text-[11px] uppercase tracking-widest text-white/40 flex-shrink-0">{k}</span>
-              <span className="text-sm text-white text-right">{v}</span>
-            </div>
-          ))}
         </div>
 
-        {/* Total */}
-        <div className="border border-[var(--color-gold)]/30 px-4 py-3 flex justify-between">
-          <span className="text-[11px] uppercase tracking-widest text-[var(--color-gold)]">Total Owed</span>
-          <span className="font-black text-white">{fmt(inv.total_owed)}</span>
+        <div className="border border-[var(--color-gold)]/40 px-4 py-3 flex justify-between">
+          <span className="text-[11px] uppercase tracking-widest text-[var(--color-gold)] font-bold">Total Owed</span>
+          <span className="font-black text-white text-lg">{fmt(inv.total_owed)}</span>
         </div>
 
-        {/* Notes */}
         <div>
-          <label className="block text-[11px] uppercase tracking-[0.2em] text-white/40 mb-2">Admin Notes</label>
+          <label className="block text-[11px] uppercase tracking-[0.2em] text-white/70 mb-2 font-bold">Admin Notes</label>
           <textarea
             value={notes} onChange={e => setNotes(e.target.value)} rows={3}
             placeholder="Add internal notes..."
-            className="w-full bg-transparent border border-white/10 p-3 text-white text-sm focus:outline-none focus:border-white/30 resize-none placeholder:text-white/20"
+            className="w-full bg-transparent border border-white/20 p-3 text-white text-sm focus:outline-none focus:border-white/50 resize-none placeholder:text-white/30"
           />
           <button
             onClick={saveNotes} disabled={savingNotes}
-            className="mt-2 text-xs uppercase tracking-widest text-[var(--color-gold)] hover:text-white transition disabled:opacity-40"
+            className="mt-2 text-xs uppercase tracking-widest text-[var(--color-gold)] hover:text-white transition disabled:opacity-40 font-bold"
           >
             {savingNotes ? "Saving…" : "Save Notes"}
           </button>
@@ -142,10 +131,10 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
 // ── Stat card ─────────────────────────────────────────────────────────────────
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="border border-white/10 p-5">
-      <p className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-2">{label}</p>
+    <div className="border border-white/10 p-5 bg-white/[0.02]">
+      <p className="text-xs uppercase tracking-[0.25em] text-white font-bold mb-2">{label}</p>
       <p className="text-2xl font-black text-white">{value}</p>
-      {sub && <p className="text-xs text-white/30 mt-1">{sub}</p>}
+      {sub && <p className="text-sm text-white/70 mt-1">{sub}</p>}
     </div>
   );
 }
@@ -153,25 +142,31 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 // ── Main dashboard ────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [invoices, setInvoices]       = useState<Invoice[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [search, setSearch]           = useState("");
-  const [weekFilter, setWeekFilter]   = useState<number | "all">(currentWeek());
+  const [invoices, setInvoices]         = useState<Invoice[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [search, setSearch]             = useState("");
+  const [weekFilter, setWeekFilter]     = useState<number | "all">(currentWeek());
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">("all");
-  const [selected, setSelected]       = useState<Invoice | null>(null);
-  const [sortDesc, setSortDesc]       = useState(true);
+  const [selected, setSelected]         = useState<Invoice | null>(null);
+  const [sortDesc, setSortDesc]         = useState(true);
+  const [adminEmail, setAdminEmail]     = useState("");
 
-  // Auth guard
+  // Auth guard + get admin name
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) navigate("/admin/login");
+      if (!data.session) {
+        navigate("/admin/login");
+      } else {
+        const email = data.session.user.email ?? "";
+        // Show name before the @ symbol, capitalised
+        const name = email.split("@")[0];
+        setAdminEmail(name.charAt(0).toUpperCase() + name.slice(1));
+      }
     });
   }, []);
 
-  // Fetch
   useEffect(() => {
     fetchInvoices();
-    // Real-time subscription
     const channel = supabase
       .channel("invoices")
       .on("postgres_changes", { event: "*", schema: "public", table: "invoices" }, fetchInvoices)
@@ -202,7 +197,6 @@ export default function AdminDashboard() {
     navigate("/admin/login");
   }
 
-  // Filter + sort
   const filtered = invoices
     .filter(inv => {
       const week = getWeek(inv.submission_date || inv.created_at);
@@ -222,13 +216,10 @@ export default function AdminDashboard() {
       return sortDesc ? db - da : da - db;
     });
 
-  // Stats (current filter)
   const totalOwed    = filtered.reduce((s, i) => s + (i.total_owed ?? 0), 0);
   const totalPaid    = filtered.filter(i => i.paid).reduce((s, i) => s + (i.total_owed ?? 0), 0);
   const totalPending = totalOwed - totalPaid;
-
-  // Week options
-  const weeks = Array.from(new Set(invoices.map(i => getWeek(i.submission_date || i.created_at)))).sort((a, b) => b - a);
+  const weeks        = Array.from(new Set(invoices.map(i => getWeek(i.submission_date || i.created_at)))).sort((a, b) => b - a);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -236,11 +227,18 @@ export default function AdminDashboard() {
       {/* Header */}
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold)]">Admin</p>
-          <h1 className="text-lg font-black uppercase tracking-tight">Invoice Dashboard</h1>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-gold)] font-bold">Invoice Dashboard</p>
+          {adminEmail && (
+            <h1 className="text-xl font-black text-white mt-0.5">
+              Welcome back, <span className="text-[var(--color-gold)]">{adminEmail}</span>
+            </h1>
+          )}
         </div>
-        <button onClick={signOut} className="flex items-center gap-2 text-white/40 hover:text-white text-xs uppercase tracking-widest transition">
-          <LogOut size={14} /> Sign Out
+        <button
+          onClick={signOut}
+          className="flex items-center gap-2 border border-white/20 hover:border-white px-4 py-2 text-xs font-bold uppercase tracking-widest text-white transition"
+        >
+          <LogOut size={13} /> Sign Out
         </button>
       </header>
 
@@ -248,28 +246,25 @@ export default function AdminDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <Stat label="Total Owed" value={fmt(totalOwed)} sub={`${filtered.length} submissions`} />
-          <Stat label="Paid Out" value={fmt(totalPaid)} sub={`${filtered.filter(i => i.paid).length} invoices`} />
+          <Stat label="Total Owed"  value={fmt(totalOwed)}    sub={`${filtered.length} submissions`} />
+          <Stat label="Paid Out"    value={fmt(totalPaid)}    sub={`${filtered.filter(i => i.paid).length} invoices`} />
           <Stat label="Outstanding" value={fmt(totalPending)} sub={`${filtered.filter(i => !i.paid).length} unpaid`} />
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 items-center">
-          {/* Search */}
           <div className="relative flex-1 min-w-48">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
             <input
               type="text" placeholder="Search name or group..." value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 pl-8 pr-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-white/30"
+              className="w-full bg-white/5 border border-white/20 pl-8 pr-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/50"
             />
           </div>
-
-          {/* Week filter */}
           <select
             value={weekFilter}
             onChange={e => setWeekFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-            className="bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none appearance-none pr-8"
+            className="bg-white/5 border border-white/20 px-3 py-2 text-sm text-white focus:outline-none appearance-none pr-8"
           >
             <option value="all" className="bg-black">All weeks</option>
             {weeks.map(w => (
@@ -278,15 +273,13 @@ export default function AdminDashboard() {
               </option>
             ))}
           </select>
-
-          {/* Status filter */}
           {(["all", "unpaid", "paid"] as const).map(s => (
             <button
               key={s} onClick={() => setStatusFilter(s)}
               className={`px-4 py-2 text-xs font-bold uppercase tracking-widest border transition ${
                 statusFilter === s
                   ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-black"
-                  : "border-white/20 text-white/50 hover:text-white hover:border-white/50"
+                  : "border-white/30 text-white hover:border-white"
               }`}
             >
               {s}
@@ -296,17 +289,17 @@ export default function AdminDashboard() {
 
         {/* Table */}
         {loading ? (
-          <p className="text-white/30 text-sm py-12 text-center">Loading submissions…</p>
+          <p className="text-white/60 text-sm py-12 text-center">Loading submissions…</p>
         ) : filtered.length === 0 ? (
-          <p className="text-white/30 text-sm py-12 text-center">No submissions match your filters.</p>
+          <p className="text-white/60 text-sm py-12 text-center">No submissions match your filters.</p>
         ) : (
-          <div className="border border-white/10 overflow-hidden">
-            {/* Table header */}
-            <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] border-b border-white/10 bg-white/5">
+          <div className="border border-white/15 overflow-hidden">
+            {/* Header row */}
+            <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] bg-[#1a1a1a] border-b border-white/15">
               {["Name", "Group / Job", "Job Type", "Submitted", "Total Owed", "Status"].map((h) => (
-                <div key={h} className="px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
+                <div key={h} className="px-4 py-3 text-xs uppercase tracking-[0.2em] text-white font-bold">
                   {h === "Submitted" ? (
-                    <button onClick={() => setSortDesc(!sortDesc)} className="flex items-center gap-1 hover:text-white transition">
+                    <button onClick={() => setSortDesc(!sortDesc)} className="flex items-center gap-1 hover:text-[var(--color-gold)] transition">
                       {h} {sortDesc ? <ChevronDown size={11} /> : <ChevronUp size={11} />}
                     </button>
                   ) : h}
@@ -314,38 +307,40 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            {/* Rows */}
-            {filtered.map(inv => (
+            {/* Data rows — alternating grey/white */}
+            {filtered.map((inv, idx) => (
               <div
                 key={inv.id}
                 onClick={() => setSelected(inv)}
-                className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] border-b border-white/5 last:border-0 hover:bg-white/5 cursor-pointer transition group"
+                className={`grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] border-b border-white/10 last:border-0 hover:bg-[var(--color-gold)]/5 cursor-pointer transition group ${
+                  idx % 2 === 0 ? "bg-[#0f0f0f]" : "bg-[#161616]"
+                }`}
               >
-                <div className="px-4 py-3">
+                <div className="px-4 py-3.5">
                   <p className="text-sm font-bold text-white group-hover:text-[var(--color-gold)] transition">
                     {inv.first_name} {inv.last_name}
                   </p>
-                  <p className="text-xs text-white/30">{inv.email}</p>
+                  <p className="text-xs text-white/60 mt-0.5">{inv.email}</p>
                 </div>
-                <div className="px-4 py-3">
-                  <p className="text-xs text-white/60 truncate">{inv.whatsapp_group || "—"}</p>
+                <div className="px-4 py-3.5 flex items-center">
+                  <p className="text-sm text-white truncate">{inv.whatsapp_group || "—"}</p>
                 </div>
-                <div className="px-4 py-3">
-                  <span className="text-xs text-white/50 capitalize">{inv.job_type || "—"}</span>
+                <div className="px-4 py-3.5 flex items-center">
+                  <span className="text-sm text-white capitalize">{inv.job_type || "—"}</span>
                 </div>
-                <div className="px-4 py-3">
-                  <span className="text-xs text-white/50">{fmtDate(inv.submission_date || inv.created_at)}</span>
+                <div className="px-4 py-3.5 flex items-center">
+                  <span className="text-sm text-white">{fmtDate(inv.submission_date || inv.created_at)}</span>
                 </div>
-                <div className="px-4 py-3">
+                <div className="px-4 py-3.5 flex items-center">
                   <span className="text-sm font-bold text-white">{fmt(inv.total_owed)}</span>
                 </div>
-                <div className="px-4 py-3 flex items-center gap-2">
+                <div className="px-4 py-3.5 flex items-center">
                   {inv.paid ? (
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-green-400">
+                    <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-green-400">
                       <CheckCircle size={13} /> Paid
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--color-gold)]">
+                    <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-gold)]">
                       <Clock size={13} /> Pending
                     </span>
                   )}
@@ -356,7 +351,6 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Detail drawer */}
       {selected && (
         <DetailDrawer
           inv={selected}

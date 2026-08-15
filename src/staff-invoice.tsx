@@ -117,12 +117,12 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     <div className="mb-6">
       <label className="block text-[11px] uppercase tracking-[0.2em] text-white font-bold mb-2">{label}</label>
       {children}
-      {hint && <p className="text-[11px] text-white/40 mt-2 leading-relaxed">{hint}</p>}
+      {hint && <p className="text-xs text-white/70 mt-2 leading-relaxed">{hint}</p>}
     </div>
   );
 }
 
-const inputCls = "w-full bg-transparent border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/30 transition-colors";
+const inputCls = "w-full bg-transparent border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/50 transition-colors";
 const selectCls = "w-full bg-black border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
 
 function RadioGrid({ options, value, onChange, cols = 3 }: {
@@ -524,7 +524,7 @@ export default function StaffInvoicePage() {
             Submit Invoice
           </button>
           {!data.agreedToTerms && (
-            <p className="text-white/30 text-xs text-center -mt-4">You must agree to the Terms &amp; Conditions before submitting.</p>
+            <p className="text-white/60 text-xs text-center -mt-4">You must agree to the Terms &amp; Conditions before submitting.</p>
           )}
 
         </form>
