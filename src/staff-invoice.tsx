@@ -106,7 +106,7 @@ function calcLabour(data: FormData): string {
 // ── UI atoms ──────────────────────────────────────────────────────────────
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[var(--color-gold)] text-[10px] uppercase tracking-[0.3em] font-bold mb-6 pb-2 border-b border-white/10">
+    <h2 className="text-[var(--color-gold)] text-xs uppercase tracking-[0.35em] font-bold mb-10 pb-3 border-b border-white/10">
       {children}
     </h2>
   );
@@ -114,26 +114,26 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="mb-6">
-      <label className="block text-[11px] uppercase tracking-[0.2em] text-white font-bold mb-2">{label}</label>
+    <div className="mb-12">
+      <label className="block text-sm uppercase tracking-[0.18em] text-white font-bold mb-4">{label}</label>
       {children}
-      {hint && <p className="text-xs text-white/70 mt-2 leading-relaxed">{hint}</p>}
+      {hint && <p className="text-sm text-white/70 mt-3 leading-relaxed">{hint}</p>}
     </div>
   );
 }
 
-const inputCls = "w-full bg-transparent border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/50 transition-colors";
-const selectCls = "w-full bg-black border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
+const inputCls = "w-full bg-transparent border-b border-white/20 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/50 transition-colors";
+const selectCls = "w-full bg-black border-b border-white/20 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
 
 function RadioGrid({ options, value, onChange, cols = 3 }: {
   options: string[]; value: string; onChange: (v: string) => void; cols?: number;
 }) {
   return (
-    <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <div className={`grid gap-3`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {options.map(opt => (
         <button
           key={opt} type="button" onClick={() => onChange(opt)}
-          className={`border px-3 py-3 text-xs font-bold uppercase tracking-wide transition-all ${
+          className={`border px-4 py-4 text-sm font-bold uppercase tracking-wide transition-all ${
             value === opt
               ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-black"
               : "border-white/20 text-white/70 hover:border-white/50"
@@ -150,11 +150,11 @@ function YesNo({ value, onChange }: {
   value: "" | "yes" | "no"; onChange: (v: "yes" | "no") => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-8">
       {(["yes", "no"] as const).map(opt => (
         <button
           key={opt} type="button" onClick={() => onChange(opt)}
-          className={`border py-3 text-xs font-black uppercase tracking-widest transition-all ${
+          className={`border py-5 text-sm font-black uppercase tracking-widest transition-all ${
             value === opt
               ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-black"
               : "border-white/20 text-white/70 hover:border-white/50"
@@ -277,28 +277,28 @@ export default function StaffInvoicePage() {
   // ── Form ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-xl mx-auto px-6 py-16">
+      <div className="max-w-3xl mx-auto px-8 py-20">
 
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-8">
-            <img src="/logoonly.png" alt="OnCue" className="w-5 h-5 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
-            <span style={{ fontFamily: "'Montserrat', sans-serif" }} className="text-xs tracking-widest">
+        <div className="mb-16">
+          <div className="flex items-center gap-2.5 mb-10">
+            <img src="/logoonly.png" alt="OnCue" className="w-6 h-6 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+            <span style={{ fontFamily: "'Montserrat', sans-serif" }} className="text-sm tracking-widest">
               OnCue <strong>MARKETING</strong>
             </span>
           </div>
-          <h1 className="text-3xl font-black uppercase tracking-tight mb-2">Invoice Submission</h1>
-          <p className="text-white/50 text-sm">
+          <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tight mb-4">Invoice Submission</h1>
+          <p className="text-white/60 text-base">
             Payments are made every <span className="text-white font-bold">Wednesday</span>. Submit as soon as the job is complete.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-12">
+        <form onSubmit={handleSubmit} className="space-y-16">
 
           {/* ── Terms & Conditions ── */}
           <div>
             <SectionHeading>Terms &amp; Conditions</SectionHeading>
-            <div className="border border-white/10 h-52 overflow-y-auto p-4 text-xs text-white leading-relaxed whitespace-pre-line font-mono mb-4">
+            <div className="border border-white/10 h-64 overflow-y-auto p-6 text-sm text-white leading-relaxed whitespace-pre-line font-mono mb-6">
               {TERMS}
             </div>
             <button
@@ -310,14 +310,14 @@ export default function StaffInvoicePage() {
               }`}>
                 {data.agreedToTerms && <span className="text-black text-xs font-black leading-none">✓</span>}
               </div>
-              <span className="text-sm text-white">I have read and agree to the Terms &amp; Conditions.</span>
+              <span className="text-base text-white">I have read and agree to the Terms &amp; Conditions.</span>
             </button>
           </div>
 
           {/* ── Personal Details ── */}
           <div>
             <SectionHeading>Personal Details</SectionHeading>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-8">
               <Field label="First Name">
                 <input className={inputCls} value={data.firstName} onChange={e => upd({ firstName: e.target.value })} placeholder="Jane" required />
               </Field>
@@ -347,7 +347,7 @@ export default function StaffInvoicePage() {
             <Field label="Account Holder Name" hint="Name exactly as it appears on your bank account">
               <input className={inputCls} value={data.accountHolder} onChange={e => upd({ accountHolder: e.target.value })} placeholder="Full name on account" required />
             </Field>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-8">
               <Field label="Account Number">
                 <input className={inputCls} value={data.accountNumber} onChange={e => upd({ accountNumber: e.target.value })} placeholder="Account number" required />
               </Field>
@@ -415,7 +415,7 @@ export default function StaffInvoicePage() {
                 {Array.from({ length: dayCount }, (_, i) => (
                   <div key={i} className="border border-white/10 p-4 mb-4">
                     <p className="text-[var(--color-gold)] text-[10px] uppercase tracking-widest font-bold mb-4">Day {i + 1}</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-8">
                       <Field label="Hours Worked" hint="Use a full stop for part hours — e.g. 4.5">
                         <input className={inputCls} type="number" min="0" step="0.5" value={data.dayHours[i] ?? ""} onChange={e => updDay("dayHours", i, e.target.value)} placeholder="e.g. 8" />
                       </Field>
@@ -463,7 +463,7 @@ export default function StaffInvoicePage() {
                 <YesNo value={data.boughtAnything} onChange={v => upd({ boughtAnything: v })} />
               </Field>
               {data.boughtAnything === "yes" && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-8">
                   <Field label="What Did You Buy?">
                     <input className={inputCls} value={data.purchaseDetails} onChange={e => upd({ purchaseDetails: e.target.value })} placeholder="Describe the items" />
                   </Field>
@@ -497,7 +497,7 @@ export default function StaffInvoicePage() {
           {data.jobType && (
             <div>
               <SectionHeading>Invoice Summary</SectionHeading>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-8">
                 <Field label="Labour Total (ZAR)" hint="Auto-calculated — edit if needed">
                   <input className={inputCls} type="number" min="0" step="0.01" value={data.labourTotal} onChange={e => upd({ labourTotal: e.target.value })} placeholder="0.00" />
                 </Field>
@@ -516,7 +516,7 @@ export default function StaffInvoicePage() {
           <button
             type="submit"
             disabled={!data.agreedToTerms || submitStatus === "loading"}
-            className="w-full bg-[var(--color-gold)] text-black py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-40 flex items-center justify-center gap-3"
+            className="w-full bg-[var(--color-gold)] text-black py-5 font-black uppercase tracking-widest text-base hover:bg-white transition disabled:opacity-40 flex items-center justify-center gap-3"
           >
             {submitStatus === "loading" && (
               <span className="w-4 h-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
