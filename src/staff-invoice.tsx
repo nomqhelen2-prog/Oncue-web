@@ -413,8 +413,8 @@ export default function StaffInvoicePage() {
                   )}
                 </Field>
                 {Array.from({ length: dayCount }, (_, i) => (
-                  <div key={i} className="border border-white/10 p-4 mb-4">
-                    <p className="text-[var(--color-gold)] text-[10px] uppercase tracking-widest font-bold mb-4">Day {i + 1}</p>
+                  <div key={i} className="border border-white/10 p-6 mb-6">
+                    <p className="text-[var(--color-gold)] text-xs uppercase tracking-widest font-bold mb-6">Day {i + 1}</p>
                     <div className="grid grid-cols-2 gap-8">
                       <Field label="Hours Worked" hint="Use a full stop for part hours — e.g. 4.5">
                         <input className={inputCls} type="number" min="0" step="0.5" value={data.dayHours[i] ?? ""} onChange={e => updDay("dayHours", i, e.target.value)} placeholder="e.g. 8" />

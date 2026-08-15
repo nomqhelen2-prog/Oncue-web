@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, type Invoice } from "../lib/supabase";
 import {
-  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp,
-  X, LayoutDashboard, FileText, Users,
+  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText,
 } from "lucide-react";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -60,7 +59,7 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
     ["Pre-Pay Received", inv.pre_pay],
     inv.pre_pay === "yes" ? ["Pre-Pay Amount", fmt(inv.pre_pay_amount)] : ["", ""],
     ["Total Owed", fmt(inv.total_owed)],
-    ["Submission Date", fmtDate(inv.submission_date)],
+    ["Submission Date", fmtDate(inv.submission_date || inv.created_at)],
     ["Agreed to T&Cs", inv.agreed_to_terms ? "Yes" : "No"],
   ] as [string, string][]).filter(([k]) => k);
 
@@ -147,9 +146,7 @@ function StatCard({ label, value, sub, accent }: {
 type NavItem = { id: string; label: string; icon: React.ReactNode };
 
 const NAV: NavItem[] = [
-  { id: "submissions", label: "Submissions",  icon: <FileText size={17} /> },
-  { id: "overview",   label: "Overview",      icon: <LayoutDashboard size={17} /> },
-  { id: "staff",      label: "Staff",         icon: <Users size={17} /> },
+  { id: "submissions", label: "Submissions", icon: <FileText size={17} /> },
 ];
 
 // ── Main dashboard ────────────────────────────────────────────────────────────
@@ -164,7 +161,7 @@ export default function AdminDashboard() {
   const [sortDesc, setSortDesc]         = useState(true);
   const [adminEmail, setAdminEmail]     = useState("");
   const [adminName, setAdminName]       = useState("");
-  const [activeNav, setActiveNav]       = useState("submissions");
+  const [activeNav]                     = useState("submissions");
 
   // Auth guard + get admin name
   useEffect(() => {
@@ -231,13 +228,16 @@ export default function AdminDashboard() {
       return sortDesc ? db - da : da - db;
     });
 
-  const totalOwed    = filtered.reduce((s, i) => s + (i.total_owed ?? 0), 0);
-  const totalPaid    = filtered.filter(i => i.paid).reduce((s, i) => s + (i.total_owed ?? 0), 0);
-  const totalPending = totalOwed - totalPaid;
   const weeks        = Array.from(new Set(invoices.map(i => getWeek(i.submission_date || i.created_at)))).sort((a, b) => b - a);
 
-  const pendingCount = invoices.filter(i => !i.paid).length;
-  const paidCount    = invoices.filter(i => i.paid).length;
+  // Stat cards always reflect ALL invoices (global overview)
+  const pendingCount  = invoices.filter(i => !i.paid).length;
+  const paidCount     = invoices.filter(i => i.paid).length;
+  const totalPaidAmt  = invoices.filter(i => i.paid).reduce((s, i) => s + (i.total_owed ?? 0), 0);
+  const totalOwedAmt  = invoices.filter(i => !i.paid).reduce((s, i) => s + (i.total_owed ?? 0), 0);
+
+  // Table footer totals follow the current filter
+  const filteredTotal = filtered.reduce((s, i) => s + (i.total_owed ?? 0), 0);
 
   return (
     <div className="flex h-screen bg-[#f5f0eb] font-sans overflow-hidden">
@@ -263,7 +263,6 @@ export default function AdminDashboard() {
           {NAV.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveNav(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition text-left ${
                 activeNav === item.id
                   ? "bg-[var(--color-gold)] text-black"
@@ -323,12 +322,12 @@ export default function AdminDashboard() {
             <StatCard
               label="Paid Out"
               value={String(paidCount)}
-              sub={fmt(totalPaid)}
+              sub={fmt(totalPaidAmt)}
               accent="text-green-600"
             />
             <StatCard
               label="Outstanding"
-              value={fmt(totalPending)}
+              value={fmt(totalOwedAmt)}
               sub={`${pendingCount} invoice${pendingCount !== 1 ? "s" : ""}`}
               accent="text-gray-800"
             />
@@ -451,7 +450,7 @@ export default function AdminDashboard() {
             {filtered.length > 0 && (
               <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
                 <p className="text-xs text-gray-400">{filtered.length} submission{filtered.length !== 1 ? "s" : ""}</p>
-                <p className="text-xs font-bold text-gray-700">Total: <span className="text-gray-900">{fmt(totalOwed)}</span></p>
+                <p className="text-xs font-bold text-gray-700">Total: <span className="text-gray-900">{fmt(filteredTotal)}</span></p>
               </div>
             )}
           </div>
