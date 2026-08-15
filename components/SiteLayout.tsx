@@ -221,7 +221,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         </div>
 
         {/* Footer Bottom */}
-        <div className="border-t border-white/10 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs uppercase tracking-widest text-white/60">
+        <div className="border-t border-white/10 py-6 flex flex-col items-center gap-3 text-xs uppercase tracking-widest text-white/60">
           <span>© {new Date().getFullYear()} OnCue Marketing — JHB | CPT | DBN</span>
           <div className="flex items-center gap-6">
             <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>

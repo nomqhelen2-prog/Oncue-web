@@ -1,12 +1,10 @@
-import { useState, useMemo } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
-
-// Submissions go to /api/submit (serverless function) — no keys in the browser
+import { useState, useEffect } from "react";
+import { CheckCircle } from "lucide-react";
 
 // ── T&Cs ──────────────────────────────────────────────────────────────────
 const TERMS = `SHIFT NOTIFICATION
 • Notify the agency at least 48 hours in advance if you cannot work a shift.
-• SMS, voicemail, and messages via friends are NOT acceptable notice.
+• SMS, voicemail and messages via friends are NOT acceptable notice.
 • Failure to arrive results in immediate blacklisting and forfeiture of payment.
 • Fines equal to the monetary value of the missed assignment apply.
 
@@ -31,7 +29,7 @@ REPORTING & FEEDBACK
 
 WORK ENVIRONMENT
 • Creating a negative work environment results in a R200 fine.
-• No smoking, drinking, gum-chewing, or phone use during promotions (R100 fine).
+• No smoking, drinking, gum-chewing or phone use during promotions (R100 fine).
 • Discussing company matters or bad-mouthing the agency: R300 fine and dismissal.
 • Discussing payment with clients or fellow promoters: R200 fine.
 
@@ -42,25 +40,15 @@ BY AGREEING, I CONFIRM:
 // ── Types ─────────────────────────────────────────────────────────────────
 interface FormData {
   agreedToTerms: boolean;
-  // Personal
   firstName: string; lastName: string; email: string; whatsapp: string;
-  // Banking
   bankName: string; accountHolder: string; accountNumber: string;
   branchCode: string; accountType: string;
-  // Job
   whatsappGroup: string;
   jobType: "" | "daily" | "hourly" | "fixed" | "setup";
-  // Daily / days
   dailyRate: string; daysWorked: string; daysOtherValue: string;
-  // Hourly: per-day arrays
   dayHours: string[]; dayRates: string[];
-  // Fixed
-  fixedRate: string;
-  // Setup
-  setupRate: string;
-  // Common closing
-  storeList: string;
-  labourTotal: string;
+  fixedRate: string; setupRate: string;
+  storeList: string; labourTotal: string;
   boughtAnything: "" | "yes" | "no";
   purchaseDetails: string; purchaseAmount: string;
   fuelContribution: "" | "yes" | "no"; fuelAmount: string;
@@ -84,45 +72,11 @@ const EMPTY: FormData = {
   totalOwed: "",
 };
 
-// ── Step order (computed from current data) ───────────────────────────────
 function parseDayCount(data: FormData): number {
   if (data.daysWorked === "Other") return parseInt(data.daysOtherValue) || 0;
   return parseInt(data.daysWorked) || 0;
 }
 
-function computeSteps(data: FormData): string[] {
-  const s = ["welcome", "terms",
-    "firstName", "lastName", "email", "whatsapp",
-    "bankName", "accountHolder", "accountNumbers", "accountType",
-    "whatsappGroup", "jobType",
-  ];
-
-  if (data.jobType === "daily") {
-    s.push("dailyRate", "daysWorked");
-    if (data.daysWorked === "Other") s.push("daysOther");
-  }
-  if (data.jobType === "hourly") {
-    s.push("daysWorked");
-    if (data.daysWorked === "Other") s.push("daysOther");
-    const n = parseDayCount(data);
-    for (let i = 1; i <= n; i++) s.push(`day${i}Hours`, `day${i}Rate`);
-  }
-  if (data.jobType === "fixed") s.push("fixedRate");
-  if (data.jobType === "setup") s.push("setupRate");
-
-  if (data.jobType) {
-    s.push("storeList", "labourTotal", "boughtAnything");
-    if (data.boughtAnything === "yes") s.push("purchaseDetails");
-    s.push("fuelContribution");
-    if (data.fuelContribution === "yes") s.push("fuelDetails");
-    s.push("prepay");
-    if (data.prepay === "yes") s.push("prepayAmount");
-    s.push("totalOwed");
-  }
-  return s;
-}
-
-// ── Auto-calculate labour total ───────────────────────────────────────────
 function calcLabour(data: FormData): string {
   if (data.jobType === "daily") {
     const rate = parseFloat(data.dailyRate);
@@ -150,73 +104,41 @@ function calcLabour(data: FormData): string {
 }
 
 // ── UI atoms ──────────────────────────────────────────────────────────────
-function StepLayout({ title, subtitle, children }: {
-  title: string; subtitle?: React.ReactNode; children?: React.ReactNode;
-}) {
+function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[340px] text-center px-2">
-      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-3 leading-tight max-w-lg">
-        {title}
-      </h2>
-      {subtitle && (
-        <p className="text-white/50 text-[13px] leading-relaxed mb-8 max-w-md">{subtitle}</p>
-      )}
-      <div className="w-full max-w-md">{children}</div>
+    <h2 className="text-[var(--color-gold)] text-[10px] uppercase tracking-[0.3em] font-bold mb-6 pb-2 border-b border-white/10">
+      {children}
+    </h2>
+  );
+}
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-6">
+      <label className="block text-[11px] uppercase tracking-[0.2em] text-white font-bold mb-2">{label}</label>
+      {children}
+      {hint && <p className="text-[11px] text-white/40 mt-2 leading-relaxed">{hint}</p>}
     </div>
   );
 }
 
-function LineInput({ value, onChange, placeholder, type = "text", hint }: {
-  value: string; onChange: (v: string) => void;
-  placeholder?: string; type?: string; hint?: string;
-}) {
-  return (
-    <div>
-      <input
-        type={type} value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full bg-transparent border-b-2 border-white/20 pb-3 text-white text-lg text-center focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/25 transition-colors"
-      />
-      {hint && <p className="text-[11px] text-white/35 mt-3 text-left leading-relaxed">{hint}</p>}
-    </div>
-  );
-}
+const inputCls = "w-full bg-transparent border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/30 transition-colors";
+const selectCls = "w-full bg-black border-b border-white/20 py-2 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
 
-function NumberInput({ value, onChange, placeholder, hint }: {
-  value: string; onChange: (v: string) => void; placeholder?: string; hint?: string;
+function RadioGrid({ options, value, onChange, cols = 3 }: {
+  options: string[]; value: string; onChange: (v: string) => void; cols?: number;
 }) {
   return (
-    <div>
-      <input
-        type="number" value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder ?? "e.g., 0"}
-        step="0.01" min="0"
-        className="w-full bg-transparent border-b-2 border-white/20 pb-3 text-white text-lg text-center focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/25 transition-colors"
-      />
-      {hint && <p className="text-[11px] text-white/35 mt-3 text-left leading-relaxed">{hint}</p>}
-    </div>
-  );
-}
-
-function RadioGrid({ options, value, onChange }: {
-  options: string[]; value: string; onChange: (v: string) => void;
-}) {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {options.map(opt => (
         <button
           key={opt} type="button" onClick={() => onChange(opt)}
-          className={`border px-4 py-4 text-sm font-bold uppercase tracking-wide transition-all flex items-center gap-3 ${
+          className={`border px-3 py-3 text-xs font-bold uppercase tracking-wide transition-all ${
             value === opt
               ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-black"
-              : "border-white/20 text-white/70 hover:border-white/50 hover:text-white"
+              : "border-white/20 text-white/70 hover:border-white/50"
           }`}
         >
-          <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
-            value === opt ? "border-black" : "border-white/40"
-          }`}>
-            {value === opt && <span className="w-2 h-2 rounded-full bg-black block" />}
-          </span>
           {opt}
         </button>
       ))}
@@ -228,14 +150,14 @@ function YesNo({ value, onChange }: {
   value: "" | "yes" | "no"; onChange: (v: "yes" | "no") => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3">
       {(["yes", "no"] as const).map(opt => (
         <button
           key={opt} type="button" onClick={() => onChange(opt)}
-          className={`border py-5 text-sm font-black uppercase tracking-widest transition-all ${
+          className={`border py-3 text-xs font-black uppercase tracking-widest transition-all ${
             value === opt
               ? "border-[var(--color-gold)] bg-[var(--color-gold)] text-black"
-              : "border-white/20 text-white/70 hover:border-white/50 hover:text-white"
+              : "border-white/20 text-white/70 hover:border-white/50"
           }`}
         >
           {opt.toUpperCase()}
@@ -245,32 +167,11 @@ function YesNo({ value, onChange }: {
   );
 }
 
-function SelectInput({ value, onChange, options }: {
-  value: string; onChange: (v: string) => void; options: string[];
-}) {
-  return (
-    <select
-      value={value} onChange={e => onChange(e.target.value)}
-      className="w-full bg-transparent border-b-2 border-white/20 pb-3 text-white text-sm text-center focus:outline-none focus:border-[var(--color-gold)] appearance-none transition-colors"
-    >
-      <option value="" className="bg-black">Select…</option>
-      {options.map(o => <option key={o} value={o} className="bg-black">{o}</option>)}
-    </select>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────
 export default function StaffInvoicePage() {
   const [data, setData] = useState<FormData>(EMPTY);
-  const [stepIndex, setStepIndex] = useState(0);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-
-  const steps = useMemo(() => computeSteps(data), [data]);
-  const stepId = steps[stepIndex];
-  const isLast = stepIndex === steps.length - 1;
-  const isFirst = stepIndex === 0;
-  const progress = Math.round(((stepIndex + 1) / steps.length) * 100);
 
   function upd(partial: Partial<FormData>) {
     setData(prev => ({ ...prev, ...partial }));
@@ -283,81 +184,39 @@ export default function StaffInvoicePage() {
     });
   }
 
-  function canAdvance(): boolean {
-    switch (stepId) {
-      case "welcome":      return true;
-      case "terms":        return data.agreedToTerms;
-      case "firstName":    return !!data.firstName.trim();
-      case "lastName":     return !!data.lastName.trim();
-      case "email":        return !!data.email.trim();
-      case "whatsapp":     return !!data.whatsapp.trim();
-      case "bankName":     return !!data.bankName;
-      case "accountHolder":return !!data.accountHolder.trim();
-      case "accountNumbers":return !!data.accountNumber.trim() && !!data.branchCode.trim();
-      case "accountType":  return !!data.accountType;
-      case "whatsappGroup":return !!data.whatsappGroup.trim();
-      case "jobType":      return !!data.jobType;
-      case "dailyRate":    return !!data.dailyRate;
-      case "daysWorked":   return !!data.daysWorked;
-      case "daysOther":    return !!data.daysOtherValue && parseInt(data.daysOtherValue) > 0;
-      case "fixedRate":    return !!data.fixedRate;
-      case "setupRate":    return !!data.setupRate;
-      case "storeList":    return !!data.storeList.trim();
-      case "labourTotal":  return !!data.labourTotal;
-      case "boughtAnything": return !!data.boughtAnything;
-      case "purchaseDetails": return !!data.purchaseDetails.trim() && !!data.purchaseAmount;
-      case "fuelContribution": return !!data.fuelContribution;
-      case "fuelDetails":  return !!data.fuelAmount;
-      case "prepay":       return !!data.prepay;
-      case "prepayAmount": return !!data.prepayAmount;
-      case "totalOwed":    return !!data.totalOwed;
-      default: {
-        // Dynamic day steps
-        if (/^day(\d+)Hours$/.test(stepId)) {
-          const i = parseInt(stepId.match(/\d+/)![0]) - 1;
-          return !!(data.dayHours[i]?.trim());
-        }
-        if (/^day(\d+)Rate$/.test(stepId)) {
-          const i = parseInt(stepId.match(/\d+/)![0]) - 1;
-          return !!(data.dayRates[i]?.trim());
-        }
-        return true;
-      }
-    }
-  }
+  const dayCount = parseDayCount(data);
 
-  function handleNext() {
-    if (!canAdvance()) return;
-    // Auto-compute labour when reaching that step
-    if (steps[stepIndex + 1] === "labourTotal") {
-      const calc = calcLabour(data);
-      if (calc) upd({ labourTotal: calc });
-    }
-    // Auto-compute total owed when reaching final step
-    if (steps[stepIndex + 1] === "totalOwed") {
-      const labour = parseFloat(data.labourTotal || "0");
-      const purchases = data.boughtAnything === "yes" ? parseFloat(data.purchaseAmount || "0") : 0;
-      const fuel = data.fuelContribution === "yes" ? parseFloat(data.fuelAmount || "0") : 0;
-      const prepaid = data.prepay === "yes" ? parseFloat(data.prepayAmount || "0") : 0;
-      const total = labour + purchases + fuel - prepaid;
-      upd({ totalOwed: total > 0 ? total.toFixed(2) : "" });
-    }
-    setStepIndex(i => i + 1);
-  }
+  // Auto-calculate labour + total whenever inputs change
+  useEffect(() => {
+    const labour = calcLabour(data);
+    const labourNum = parseFloat(labour || "0");
+    const purchases = data.boughtAnything === "yes" ? parseFloat(data.purchaseAmount || "0") : 0;
+    const fuel = data.fuelContribution === "yes" ? parseFloat(data.fuelAmount || "0") : 0;
+    const prepaid = data.prepay === "yes" ? parseFloat(data.prepayAmount || "0") : 0;
+    const total = labourNum + purchases + fuel - prepaid;
+    setData(prev => ({
+      ...prev,
+      labourTotal: labour,
+      totalOwed: labourNum > 0 || purchases > 0 || fuel > 0 ? total.toFixed(2) : "",
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    data.jobType, data.dailyRate, data.daysWorked, data.daysOtherValue,
+    data.dayHours.join(","), data.dayRates.join(","),
+    data.fixedRate, data.setupRate,
+    data.boughtAnything, data.purchaseAmount,
+    data.fuelContribution, data.fuelAmount,
+    data.prepay, data.prepayAmount,
+  ]);
 
-  function handlePrev() {
-    setStepIndex(i => Math.max(0, i - 1));
-  }
-
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setSubmitStatus("loading");
-    const dayCount = parseDayCount(data);
     const dayBreakdown: Record<string, string> = {};
     for (let i = 0; i < dayCount; i++) {
       dayBreakdown[`Day ${i + 1} Hours`] = data.dayHours[i] || "";
       dayBreakdown[`Day ${i + 1} Rate (ZAR)`] = data.dayRates[i] || "";
     }
-
     const fields: Record<string, unknown> = {
       "First Name": data.firstName, "Last Name": data.lastName,
       "Email": data.email, "WhatsApp Number": data.whatsapp,
@@ -384,15 +243,14 @@ export default function StaffInvoicePage() {
       "Agreed to T&Cs": data.agreedToTerms,
       "Submission Date": new Date().toISOString().split("T")[0],
     };
-
     try {
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fields }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Submission failed");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Submission failed");
       setSubmitStatus("success");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong.");
@@ -400,7 +258,7 @@ export default function StaffInvoicePage() {
     }
   }
 
-  // ── Success screen ────────────────────────────────────────────────────
+  // ── Success ───────────────────────────────────────────────────────────
   if (submitStatus === "success") {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
@@ -408,348 +266,269 @@ export default function StaffInvoicePage() {
           <CheckCircle className="w-14 h-14 text-[var(--color-gold)] mx-auto mb-6" />
           <h1 className="text-2xl font-black uppercase tracking-widest text-white mb-4">Invoice Submitted</h1>
           <p className="text-white/50 text-sm leading-relaxed">
-            Your invoice has been received. Payments are processed every <strong className="text-white">Wednesday</strong> —
-            late submissions will be carried over to the following week.
+            Your invoice has been received. Payments are processed every{" "}
+            <strong className="text-white">Wednesday</strong> — late submissions carry over to the following week.
           </p>
         </div>
       </div>
     );
   }
 
-  // ── Step renderer ─────────────────────────────────────────────────────
-  function renderStep() {
-    const dayMatch = stepId.match(/^day(\d+)(Hours|Rate)$/);
-    if (dayMatch) {
-      const dayNum = parseInt(dayMatch[1]);
-      const idx = dayNum - 1;
-      const isHours = dayMatch[2] === "Hours";
-      return isHours ? (
-        <StepLayout
-          title={`Day ${dayNum} — Total Hours Worked`}
-          subtitle={<>If you worked part hours (e.g. 4.5 hrs) please use a <strong className="text-white">full stop</strong>, not a comma.</>}
-        >
-          <NumberInput
-            value={data.dayHours[idx] ?? ""}
-            onChange={v => updDay("dayHours", idx, v)}
-            placeholder="e.g., 8"
-          />
-        </StepLayout>
-      ) : (
-        <StepLayout
-          title={`Day ${dayNum} — Rate Per Hour (ZAR)`}
-          subtitle={<>Please <strong className="text-white">DO NOT</strong> insert the Rand symbol — numbers only.</>}
-        >
-          <NumberInput
-            value={data.dayRates[idx] ?? ""}
-            onChange={v => updDay("dayRates", idx, v)}
-            placeholder="e.g., 120"
-          />
-        </StepLayout>
-      );
-    }
-
-    switch (stepId) {
-      case "welcome": return (
-        <StepLayout title="Invoice Submission">
-          <div className="text-left space-y-3 text-[13px] text-white/60 leading-relaxed border border-white/10 p-5">
-            <p><span className="text-white font-bold">Payments are made every Wednesday.</span> Late invoices carry over to the following week — please submit as soon as the job is complete.</p>
-            <p>The form asks <span className="text-white">different questions based on your job type</span> — read each screen carefully before answering.</p>
-            <p>Give <span className="text-white">as much detail as possible</span> so we know exactly what your invoice is for.</p>
-          </div>
-        </StepLayout>
-      );
-
-      case "terms": return (
-        <StepLayout title="Terms & Conditions" subtitle="Read and agree before continuing.">
-          <div className="border border-white/10 h-52 overflow-y-auto p-4 text-[11px] text-white/40 leading-relaxed text-left whitespace-pre-line font-mono mb-5">
-            {TERMS}
-          </div>
-          <button
-            type="button" onClick={() => upd({ agreedToTerms: !data.agreedToTerms })}
-            className="flex items-center gap-3 w-full text-left group"
-          >
-            <div className={`w-5 h-5 flex-shrink-0 border-2 flex items-center justify-center transition-colors ${
-              data.agreedToTerms ? "border-[var(--color-gold)] bg-[var(--color-gold)]" : "border-white/30"
-            }`}>
-              {data.agreedToTerms && <span className="text-black text-xs font-black leading-none">✓</span>}
-            </div>
-            <span className="text-sm text-white/70">I have read and agree to the Terms &amp; Conditions.</span>
-          </button>
-        </StepLayout>
-      );
-
-      case "firstName": return (
-        <StepLayout title="First Name">
-          <LineInput value={data.firstName} onChange={v => upd({ firstName: v })} placeholder="Enter your first name" />
-        </StepLayout>
-      );
-      case "lastName": return (
-        <StepLayout title="Last Name">
-          <LineInput value={data.lastName} onChange={v => upd({ lastName: v })} placeholder="Enter your last name" />
-        </StepLayout>
-      );
-      case "email": return (
-        <StepLayout title="Email Address">
-          <LineInput value={data.email} onChange={v => upd({ email: v })} placeholder="you@example.com" type="email" />
-        </StepLayout>
-      );
-      case "whatsapp": return (
-        <StepLayout title="WhatsApp Number">
-          <LineInput value={data.whatsapp} onChange={v => upd({ whatsapp: v })} placeholder="e.g. 0821234567"
-            hint="Include country code if outside South Africa (e.g. +27821234567)" />
-        </StepLayout>
-      );
-
-      case "bankName": return (
-        <StepLayout title="Bank Name">
-          <SelectInput value={data.bankName} onChange={v => upd({ bankName: v })}
-            options={["FNB","Standard Bank","ABSA","Nedbank","Capitec","TymeBank","Discovery Bank","African Bank","Other"]} />
-        </StepLayout>
-      );
-      case "accountHolder": return (
-        <StepLayout title="Account Holder Name" subtitle="Name exactly as it appears on your bank account.">
-          <LineInput value={data.accountHolder} onChange={v => upd({ accountHolder: v })} placeholder="Account holder name" />
-        </StepLayout>
-      );
-      case "accountNumbers": return (
-        <StepLayout title="Account Number & Branch Code">
-          <div className="space-y-6">
-            <LineInput value={data.accountNumber} onChange={v => upd({ accountNumber: v })} placeholder="Account number" />
-            <LineInput value={data.branchCode} onChange={v => upd({ branchCode: v })} placeholder="Branch code (e.g. 250655)" />
-          </div>
-        </StepLayout>
-      );
-      case "accountType": return (
-        <StepLayout title="Account Type">
-          <RadioGrid
-            options={["Cheque / Current", "Savings"]}
-            value={data.accountType} onChange={v => upd({ accountType: v })}
-          />
-        </StepLayout>
-      );
-
-      case "whatsappGroup": return (
-        <StepLayout
-          title="WhatsApp Group Name"
-          subtitle="Insert the WhatsApp group name for this job. If you were not added to a group, specify the brand and position — e.g. 'Merc Backup Promoter'."
-        >
-          <LineInput value={data.whatsappGroup} onChange={v => upd({ whatsappGroup: v })}
-            placeholder="e.g. Merc Brand Ambassador Dec" />
-        </StepLayout>
-      );
-
-      case "jobType": return (
-        <StepLayout title="What type of job was this?">
-          <RadioGrid
-            options={["Daily Rate", "Hourly", "Fixed Rate", "Setup / Breakdown / Delivery"]}
-            value={
-              data.jobType === "daily" ? "Daily Rate"
-              : data.jobType === "hourly" ? "Hourly"
-              : data.jobType === "fixed" ? "Fixed Rate"
-              : data.jobType === "setup" ? "Setup / Breakdown / Delivery"
-              : ""
-            }
-            onChange={v => upd({
-              jobType: v === "Daily Rate" ? "daily"
-                : v === "Hourly" ? "hourly"
-                : v === "Fixed Rate" ? "fixed"
-                : "setup",
-              daysWorked: "", daysOtherValue: "",
-              dayHours: [], dayRates: [],
-            })}
-          />
-        </StepLayout>
-      );
-
-      case "dailyRate": return (
-        <StepLayout
-          title="Daily Rate in ZAR"
-          subtitle={<>Please <strong className="text-white">DO NOT</strong> insert the Rand symbol — numbers only.</>}
-        >
-          <NumberInput value={data.dailyRate} onChange={v => upd({ dailyRate: v })} placeholder="e.g., 800" />
-        </StepLayout>
-      );
-
-      case "daysWorked": return (
-        <StepLayout title="Total Amount of Days Worked">
-          <RadioGrid
-            options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]}
-            value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "" })}
-          />
-        </StepLayout>
-      );
-
-      case "daysOther": return (
-        <StepLayout title="How many days did you work?">
-          <NumberInput value={data.daysOtherValue} onChange={v => upd({ daysOtherValue: v })} placeholder="e.g., 10" />
-        </StepLayout>
-      );
-
-      case "fixedRate": return (
-        <StepLayout
-          title="Fixed Rate for the Job (ZAR)"
-          subtitle={<>Please <strong className="text-white">DO NOT</strong> insert the Rand symbol — numbers only.</>}
-        >
-          <NumberInput value={data.fixedRate} onChange={v => upd({ fixedRate: v })} placeholder="e.g., 1500" />
-        </StepLayout>
-      );
-
-      case "setupRate": return (
-        <StepLayout
-          title="Rate Per Setup / Breakdown / Delivery (ZAR)"
-          subtitle={<>Insert the rate given per store. <strong className="text-white">DO NOT</strong> insert the Rand symbol. This is as per the rate given in the WhatsApp group (e.g. R300 for 1 store, R250 for more than 1 store).</>}
-        >
-          <NumberInput value={data.setupRate} onChange={v => upd({ setupRate: v })} placeholder="e.g., 300" />
-        </StepLayout>
-      );
-
-      case "storeList": return (
-        <StepLayout
-          title="List the Stores You Worked"
-          subtitle="Brand name and mall — e.g. 'Vodacom Fourways Mall'. If you returned to a store, add (return) after the store name."
-        >
-          <textarea
-            value={data.storeList} onChange={e => upd({ storeList: e.target.value })}
-            rows={4} placeholder="e.g.&#10;Vodacom Fourways Mall&#10;Samsung Sandton City (return)"
-            className="w-full bg-transparent border-b-2 border-white/20 pb-2 text-white text-sm text-left focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/25 resize-none transition-colors"
-          />
-        </StepLayout>
-      );
-
-      case "labourTotal": return (
-        <StepLayout title="Total Labour Owed to You (ZAR)"
-          subtitle="This has been calculated from your entries. Correct it if needed.">
-          <NumberInput value={data.labourTotal} onChange={v => upd({ labourTotal: v })} />
-        </StepLayout>
-      );
-
-      case "boughtAnything": return (
-        <StepLayout
-          title="Did You Have to Buy Anything for This Job?"
-          subtitle="e.g. Bubblewrap, box, tape, plugs, flowers, sweets, food (lunch drop)"
-        >
-          <YesNo value={data.boughtAnything} onChange={v => upd({ boughtAnything: v })} />
-        </StepLayout>
-      );
-
-      case "purchaseDetails": return (
-        <StepLayout title="What Did You Buy & How Much?">
-          <div className="space-y-6">
-            <LineInput value={data.purchaseDetails} onChange={v => upd({ purchaseDetails: v })}
-              placeholder="Describe what you purchased" />
-            <NumberInput value={data.purchaseAmount} onChange={v => upd({ purchaseAmount: v })}
-              placeholder="Total amount spent (ZAR)"
-              hint="DO NOT insert the Rand symbol — numbers only." />
-          </div>
-        </StepLayout>
-      );
-
-      case "fuelContribution": return (
-        <StepLayout
-          title="Did This Job Include a Fuel Contribution?"
-          subtitle="Did the brief say anything about being paid per km for this job?"
-        >
-          <YesNo value={data.fuelContribution} onChange={v => upd({ fuelContribution: v })} />
-        </StepLayout>
-      );
-
-      case "fuelDetails": return (
-        <StepLayout title="Fuel Contribution Amount (ZAR)"
-          subtitle="Enter the total fuel/km amount owed to you. DO NOT insert the Rand symbol.">
-          <NumberInput value={data.fuelAmount} onChange={v => upd({ fuelAmount: v })} placeholder="e.g., 150" />
-        </StepLayout>
-      );
-
-      case "prepay": return (
-        <StepLayout
-          title="Did the Agency Pre-Pay You Any Money?"
-          subtitle="Did you receive any money upfront to purchase anything for this job?"
-        >
-          <YesNo value={data.prepay} onChange={v => upd({ prepay: v })} />
-        </StepLayout>
-      );
-
-      case "prepayAmount": return (
-        <StepLayout title="How Much Were You Pre-Paid? (ZAR)"
-          subtitle="This will be deducted from your total owed. DO NOT insert the Rand symbol.">
-          <NumberInput value={data.prepayAmount} onChange={v => upd({ prepayAmount: v })} placeholder="e.g., 200" />
-        </StepLayout>
-      );
-
-      case "totalOwed": return (
-        <StepLayout title="Total Rand Value Owed to You"
-          subtitle="This has been calculated from all your entries. Correct it if needed.">
-          <NumberInput value={data.totalOwed} onChange={v => upd({ totalOwed: v })} />
-        </StepLayout>
-      );
-
-      default: return <StepLayout title="Unknown step" />;
-    }
-  }
-
-  const ok = canAdvance();
-
+  // ── Form ─────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-xl mx-auto px-6 py-16">
 
-      {/* ── Progress bar ── */}
-      <div className="h-1 bg-white/10 w-full">
-        <div
-          className="h-1 bg-[var(--color-gold)] transition-all duration-500"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-8">
+            <img src="/logoonly.png" alt="OnCue" className="w-5 h-5 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+            <span style={{ fontFamily: "'Montserrat', sans-serif" }} className="text-xs tracking-widest">
+              OnCue <strong>MARKETING</strong>
+            </span>
+          </div>
+          <h1 className="text-3xl font-black uppercase tracking-tight mb-2">Invoice Submission</h1>
+          <p className="text-white/50 text-sm">
+            Payments are made every <span className="text-white font-bold">Wednesday</span>. Submit as soon as the job is complete.
+          </p>
+        </div>
 
-      {/* ── Step counter ── */}
-      <div className="text-center pt-5 pb-1">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">
-          Step {stepIndex + 1} of {steps.length}
-        </p>
-      </div>
+        <form onSubmit={handleSubmit} className="space-y-12">
 
-      {/* ── Step content ── */}
-      <div className="flex-1 flex items-center justify-center px-5 py-8">
-        {renderStep()}
-      </div>
+          {/* ── Terms & Conditions ── */}
+          <div>
+            <SectionHeading>Terms &amp; Conditions</SectionHeading>
+            <div className="border border-white/10 h-52 overflow-y-auto p-4 text-xs text-white leading-relaxed whitespace-pre-line font-mono mb-4">
+              {TERMS}
+            </div>
+            <button
+              type="button" onClick={() => upd({ agreedToTerms: !data.agreedToTerms })}
+              className="flex items-center gap-3 text-left group"
+            >
+              <div className={`w-5 h-5 flex-shrink-0 border-2 flex items-center justify-center transition-colors ${
+                data.agreedToTerms ? "border-[var(--color-gold)] bg-[var(--color-gold)]" : "border-white/30"
+              }`}>
+                {data.agreedToTerms && <span className="text-black text-xs font-black leading-none">✓</span>}
+              </div>
+              <span className="text-sm text-white">I have read and agree to the Terms &amp; Conditions.</span>
+            </button>
+          </div>
 
-      {/* ── Error message ── */}
-      {submitStatus === "error" && (
-        <p className="text-red-400 text-sm text-center px-6 pb-4">{errorMsg}</p>
-      )}
+          {/* ── Personal Details ── */}
+          <div>
+            <SectionHeading>Personal Details</SectionHeading>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="First Name">
+                <input className={inputCls} value={data.firstName} onChange={e => upd({ firstName: e.target.value })} placeholder="Jane" required />
+              </Field>
+              <Field label="Last Name">
+                <input className={inputCls} value={data.lastName} onChange={e => upd({ lastName: e.target.value })} placeholder="Doe" required />
+              </Field>
+            </div>
+            <Field label="Email Address">
+              <input className={inputCls} type="email" value={data.email} onChange={e => upd({ email: e.target.value })} placeholder="you@example.com" required />
+            </Field>
+            <Field label="WhatsApp Number" hint="Include country code if outside South Africa — e.g. +27821234567">
+              <input className={inputCls} value={data.whatsapp} onChange={e => upd({ whatsapp: e.target.value })} placeholder="0821234567" required />
+            </Field>
+          </div>
 
-      {/* ── Navigation ── */}
-      <div className="grid grid-cols-2 border-t border-white/10">
-        <button
-          type="button" onClick={handlePrev} disabled={isFirst}
-          className="flex items-center justify-center gap-3 py-5 text-xs font-black uppercase tracking-widest text-white/60 hover:text-white disabled:opacity-20 transition border-r border-white/10"
-        >
-          <ArrowLeft size={16} /> Previous
-        </button>
+          {/* ── Banking Details ── */}
+          <div>
+            <SectionHeading>Banking Details</SectionHeading>
+            <Field label="Bank Name">
+              <select className={selectCls} value={data.bankName} onChange={e => upd({ bankName: e.target.value })} required>
+                <option value="">Select bank…</option>
+                {["FNB","Standard Bank","ABSA","Nedbank","Capitec","TymeBank","Discovery Bank","African Bank","Other"].map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Account Holder Name" hint="Name exactly as it appears on your bank account">
+              <input className={inputCls} value={data.accountHolder} onChange={e => upd({ accountHolder: e.target.value })} placeholder="Full name on account" required />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Account Number">
+                <input className={inputCls} value={data.accountNumber} onChange={e => upd({ accountNumber: e.target.value })} placeholder="Account number" required />
+              </Field>
+              <Field label="Branch Code">
+                <input className={inputCls} value={data.branchCode} onChange={e => upd({ branchCode: e.target.value })} placeholder="e.g. 250655" required />
+              </Field>
+            </div>
+            <Field label="Account Type">
+              <RadioGrid options={["Cheque / Current", "Savings"]} value={data.accountType} onChange={v => upd({ accountType: v })} cols={2} />
+            </Field>
+          </div>
 
-        {isLast ? (
+          {/* ── Job Details ── */}
+          <div>
+            <SectionHeading>Job Details</SectionHeading>
+            <Field label="WhatsApp Group Name" hint="Insert the WhatsApp group name for this job. If there was no group, write the brand and role — e.g. 'Merc Backup Promoter'">
+              <input className={inputCls} value={data.whatsappGroup} onChange={e => upd({ whatsappGroup: e.target.value })} placeholder="e.g. Merc Brand Ambassador Dec" required />
+            </Field>
+            <Field label="Job Type">
+              <RadioGrid
+                options={["Daily Rate", "Hourly", "Fixed Rate", "Setup / Breakdown / Delivery"]}
+                value={
+                  data.jobType === "daily" ? "Daily Rate"
+                  : data.jobType === "hourly" ? "Hourly"
+                  : data.jobType === "fixed" ? "Fixed Rate"
+                  : data.jobType === "setup" ? "Setup / Breakdown / Delivery"
+                  : ""
+                }
+                onChange={v => upd({
+                  jobType: v === "Daily Rate" ? "daily" : v === "Hourly" ? "hourly" : v === "Fixed Rate" ? "fixed" : "setup",
+                  daysWorked: "", daysOtherValue: "", dayHours: [], dayRates: [],
+                })}
+                cols={2}
+              />
+            </Field>
+
+            {/* Daily rate fields */}
+            {data.jobType === "daily" && (
+              <>
+                <Field label="Daily Rate (ZAR)" hint="Numbers only — do not add the Rand symbol">
+                  <input className={inputCls} type="number" min="0" step="0.01" value={data.dailyRate} onChange={e => upd({ dailyRate: e.target.value })} placeholder="e.g. 800" />
+                </Field>
+                <Field label="Total Days Worked">
+                  <RadioGrid options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]} value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "" })} cols={4} />
+                  {data.daysWorked === "Other" && (
+                    <div className="mt-3">
+                      <input className={inputCls} type="number" min="1" value={data.daysOtherValue} onChange={e => upd({ daysOtherValue: e.target.value })} placeholder="Enter number of days" />
+                    </div>
+                  )}
+                </Field>
+              </>
+            )}
+
+            {/* Hourly fields */}
+            {data.jobType === "hourly" && (
+              <>
+                <Field label="Total Days Worked">
+                  <RadioGrid options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]} value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "", dayHours: [], dayRates: [] })} cols={4} />
+                  {data.daysWorked === "Other" && (
+                    <div className="mt-3">
+                      <input className={inputCls} type="number" min="1" value={data.daysOtherValue} onChange={e => upd({ daysOtherValue: e.target.value })} placeholder="Enter number of days" />
+                    </div>
+                  )}
+                </Field>
+                {Array.from({ length: dayCount }, (_, i) => (
+                  <div key={i} className="border border-white/10 p-4 mb-4">
+                    <p className="text-[var(--color-gold)] text-[10px] uppercase tracking-widest font-bold mb-4">Day {i + 1}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Field label="Hours Worked" hint="Use a full stop for part hours — e.g. 4.5">
+                        <input className={inputCls} type="number" min="0" step="0.5" value={data.dayHours[i] ?? ""} onChange={e => updDay("dayHours", i, e.target.value)} placeholder="e.g. 8" />
+                      </Field>
+                      <Field label="Rate Per Hour (ZAR)" hint="Numbers only">
+                        <input className={inputCls} type="number" min="0" step="0.01" value={data.dayRates[i] ?? ""} onChange={e => updDay("dayRates", i, e.target.value)} placeholder="e.g. 120" />
+                      </Field>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* Fixed rate */}
+            {data.jobType === "fixed" && (
+              <Field label="Fixed Rate for the Job (ZAR)" hint="Numbers only — do not add the Rand symbol">
+                <input className={inputCls} type="number" min="0" step="0.01" value={data.fixedRate} onChange={e => upd({ fixedRate: e.target.value })} placeholder="e.g. 1500" />
+              </Field>
+            )}
+
+            {/* Setup rate */}
+            {data.jobType === "setup" && (
+              <Field label="Rate Per Setup / Breakdown / Delivery (ZAR)" hint="Insert the rate given per store as per the WhatsApp group (e.g. R300 for 1 store). Numbers only.">
+                <input className={inputCls} type="number" min="0" step="0.01" value={data.setupRate} onChange={e => upd({ setupRate: e.target.value })} placeholder="e.g. 300" />
+              </Field>
+            )}
+
+            {/* Stores worked — shown once job type is selected */}
+            {data.jobType && (
+              <Field label="Stores / Venues Worked" hint="Brand name and mall — e.g. 'Vodacom Fourways Mall'. Add (return) if you revisited a store.">
+                <textarea
+                  className={`${inputCls} resize-none`} rows={4}
+                  value={data.storeList} onChange={e => upd({ storeList: e.target.value })}
+                  placeholder={"e.g.\nVodacom Fourways Mall\nSamsung Sandton City (return)"}
+                />
+              </Field>
+            )}
+          </div>
+
+          {/* ── Expenses ── */}
+          {data.jobType && (
+            <div>
+              <SectionHeading>Expenses &amp; Deductions</SectionHeading>
+
+              <Field label="Did You Have to Buy Anything for This Job?" hint="e.g. bubblewrap, tape, flowers, food (lunch drop)">
+                <YesNo value={data.boughtAnything} onChange={v => upd({ boughtAnything: v })} />
+              </Field>
+              {data.boughtAnything === "yes" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="What Did You Buy?">
+                    <input className={inputCls} value={data.purchaseDetails} onChange={e => upd({ purchaseDetails: e.target.value })} placeholder="Describe the items" />
+                  </Field>
+                  <Field label="Total Spent (ZAR)" hint="Numbers only">
+                    <input className={inputCls} type="number" min="0" step="0.01" value={data.purchaseAmount} onChange={e => upd({ purchaseAmount: e.target.value })} placeholder="e.g. 85" />
+                  </Field>
+                </div>
+              )}
+
+              <Field label="Did This Job Include a Fuel Contribution?" hint="Did the brief mention being paid per km?">
+                <YesNo value={data.fuelContribution} onChange={v => upd({ fuelContribution: v })} />
+              </Field>
+              {data.fuelContribution === "yes" && (
+                <Field label="Fuel / Km Amount (ZAR)" hint="Numbers only">
+                  <input className={inputCls} type="number" min="0" step="0.01" value={data.fuelAmount} onChange={e => upd({ fuelAmount: e.target.value })} placeholder="e.g. 150" />
+                </Field>
+              )}
+
+              <Field label="Did the Agency Pre-Pay You Any Money?" hint="Any money received upfront to purchase items for this job">
+                <YesNo value={data.prepay} onChange={v => upd({ prepay: v })} />
+              </Field>
+              {data.prepay === "yes" && (
+                <Field label="Pre-Pay Amount (ZAR)" hint="This will be deducted from your total. Numbers only.">
+                  <input className={inputCls} type="number" min="0" step="0.01" value={data.prepayAmount} onChange={e => upd({ prepayAmount: e.target.value })} placeholder="e.g. 200" />
+                </Field>
+              )}
+            </div>
+          )}
+
+          {/* ── Totals (auto-calculated, read-only) ── */}
+          {data.jobType && (
+            <div>
+              <SectionHeading>Invoice Summary</SectionHeading>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Labour Total (ZAR)" hint="Auto-calculated — edit if needed">
+                  <input className={inputCls} type="number" min="0" step="0.01" value={data.labourTotal} onChange={e => upd({ labourTotal: e.target.value })} placeholder="0.00" />
+                </Field>
+                <Field label="Total Owed (ZAR)" hint="Auto-calculated — edit if needed">
+                  <input className={`${inputCls} font-bold text-[var(--color-gold)]`} type="number" min="0" step="0.01" value={data.totalOwed} onChange={e => upd({ totalOwed: e.target.value })} placeholder="0.00" />
+                </Field>
+              </div>
+            </div>
+          )}
+
+          {/* ── Submit ── */}
+          {submitStatus === "error" && (
+            <p className="text-red-400 text-sm">{errorMsg}</p>
+          )}
+
           <button
-            type="button" onClick={handleSubmit}
-            disabled={!ok || submitStatus === "loading"}
-            className={`flex items-center justify-center gap-3 py-5 text-xs font-black uppercase tracking-widest transition ${
-              ok ? "bg-[var(--color-gold)] text-black hover:bg-white" : "text-white/30"
-            }`}
+            type="submit"
+            disabled={!data.agreedToTerms || submitStatus === "loading"}
+            className="w-full bg-[var(--color-gold)] text-black py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-40 flex items-center justify-center gap-3"
           >
-            {submitStatus === "loading" ? (
-              <><span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" /> Submitting…</>
-            ) : <>Submit <ArrowRight size={16} /></>}
+            {submitStatus === "loading" && (
+              <span className="w-4 h-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
+            )}
+            Submit Invoice
           </button>
-        ) : (
-          <button
-            type="button" onClick={handleNext} disabled={!ok}
-            className={`flex items-center justify-center gap-3 py-5 text-xs font-black uppercase tracking-widest transition ${
-              ok ? "text-white hover:text-[var(--color-gold)]" : "text-white/25 cursor-not-allowed"
-            }`}
-          >
-            Next <ArrowRight size={16} />
-          </button>
-        )}
-      </div>
+          {!data.agreedToTerms && (
+            <p className="text-white/30 text-xs text-center -mt-4">You must agree to the Terms &amp; Conditions before submitting.</p>
+          )}
 
+        </form>
+      </div>
     </div>
   );
 }
