@@ -3,7 +3,7 @@
     "target": "es2023",
     "module": "esnext",
     "lib": ["ES2023", "DOM"],
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "skipLibCheck": true,
     "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
@@ -27,6 +27,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "components/SiteLayout.tsx", "components/Starburst.tsx", "integrations/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "components/SiteLayout.tsx", "components/Starburst.tsx", "integrations/**/*.ts", "api/**/*.ts"],
   "exclude": []
 }
