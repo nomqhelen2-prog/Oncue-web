@@ -40,7 +40,8 @@ BY AGREEING, I CONFIRM:
 // ── Types ─────────────────────────────────────────────────────────────────
 interface FormData {
   agreedToTerms: boolean;
-  firstName: string; lastName: string; email: string; whatsapp: string;
+  firstName: string; lastName: string; email: string;
+  countryCode: string; whatsapp: string;
   bankName: string; accountHolder: string; accountNumber: string;
   branchCode: string; accountType: string;
   whatsappGroup: string;
@@ -58,7 +59,8 @@ interface FormData {
 
 const EMPTY: FormData = {
   agreedToTerms: false,
-  firstName: "", lastName: "", email: "", whatsapp: "",
+  firstName: "", lastName: "", email: "",
+  countryCode: "+27", whatsapp: "",
   bankName: "", accountHolder: "", accountNumber: "",
   branchCode: "", accountType: "",
   whatsappGroup: "", jobType: "",
@@ -219,7 +221,7 @@ export default function StaffInvoicePage() {
     }
     const fields: Record<string, unknown> = {
       "First Name": data.firstName, "Last Name": data.lastName,
-      "Email": data.email, "WhatsApp Number": data.whatsapp,
+      "Email": data.email, "WhatsApp Number": `${data.countryCode}${data.whatsapp.replace(/^0/, "")}`,
       "Bank Name": data.bankName, "Account Holder": data.accountHolder,
       "Account Number": data.accountNumber, "Branch Code": data.branchCode,
       "Account Type": data.accountType,
@@ -328,8 +330,39 @@ export default function StaffInvoicePage() {
             <Field label="Email Address">
               <input className={inputCls} type="email" value={data.email} onChange={e => upd({ email: e.target.value })} placeholder="you@example.com" required />
             </Field>
-            <Field label="WhatsApp Number" hint="Include country code if outside South Africa — e.g. +27821234567">
-              <input className={inputCls} value={data.whatsapp} onChange={e => upd({ whatsapp: e.target.value })} placeholder="0821234567" required />
+            <Field label="WhatsApp Number" hint="Select your country code, then enter your number without the leading zero.">
+              <div className="flex gap-3 items-end">
+                <select
+                  value={data.countryCode}
+                  onChange={e => upd({ countryCode: e.target.value })}
+                  className="bg-black border-b border-white/20 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none w-44 flex-shrink-0"
+                >
+                  {[
+                    ["+27",  "🇿🇦 +27  SA"],
+                    ["+263", "🇿🇼 +263 ZW"],
+                    ["+260", "🇿🇲 +260 ZM"],
+                    ["+267", "🇧🇼 +267 BW"],
+                    ["+264", "🇳🇦 +264 NA"],
+                    ["+258", "🇲🇿 +258 MZ"],
+                    ["+266", "🇱🇸 +266 LS"],
+                    ["+268", "🇸🇿 +268 SZ"],
+                    ["+254", "🇰🇪 +254 KE"],
+                    ["+234", "🇳🇬 +234 NG"],
+                    ["+233", "🇬🇭 +233 GH"],
+                    ["+44",  "🇬🇧 +44  UK"],
+                    ["+1",   "🇺🇸 +1   US"],
+                  ].map(([code, label]) => (
+                    <option key={code} value={code} className="bg-black">{label}</option>
+                  ))}
+                </select>
+                <input
+                  className={`${inputCls} flex-1`}
+                  value={data.whatsapp}
+                  onChange={e => upd({ whatsapp: e.target.value })}
+                  placeholder="821234567"
+                  required
+                />
+              </div>
             </Field>
           </div>
 
@@ -339,7 +372,11 @@ export default function StaffInvoicePage() {
             <Field label="Bank Name">
               <select className={selectCls} value={data.bankName} onChange={e => upd({ bankName: e.target.value })} required>
                 <option value="">Select bank…</option>
-                {["FNB","Standard Bank","ABSA","Nedbank","Capitec","TymeBank","Discovery Bank","African Bank","Other"].map(b => (
+                {[
+                  "FNB","Standard Bank","ABSA","Nedbank","Capitec",
+                  "TymeBank","Discovery Bank","African Bank","Bank Zero",
+                  "Investec","NMB Bank","Sasfin","Grindrod Bank","Other"
+                ].map(b => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
