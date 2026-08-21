@@ -279,7 +279,7 @@ export default function StaffInvoicePage() {
   // ── Form ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-3xl mx-auto px-8 py-20">
+      <div className="max-w-5xl mx-auto px-10 py-20">
 
         {/* Header */}
         <div className="mb-16">

@@ -135,7 +135,7 @@ function StatCard({ label, value, sub, accent }: {
   label: string; value: string; sub?: string; accent?: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-5 flex flex-col gap-2 shadow-sm">
+    <div className="bg-white rounded-none p-5 flex flex-col gap-2 shadow-sm border border-gray-100">
       <p className="text-xs uppercase tracking-[0.2em] text-gray-500 font-semibold">{label}</p>
       <p className={`text-3xl font-black ${accent ?? "text-gray-800"}`}>{value}</p>
       {sub && <p className="text-sm text-gray-500">{sub}</p>}
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
   const [loading, setLoading]           = useState(true);
   const [search, setSearch]             = useState("");
   const [weekFilter, setWeekFilter]     = useState<number | "all">(currentWeek());
-  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">("unpaid");
   const [selected, setSelected]         = useState<Invoice | null>(null);
   const [sortDesc, setSortDesc]         = useState(true);
   const [adminEmail, setAdminEmail]     = useState("");
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
           {NAV.map(item => (
             <button
               key={item.id}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition text-left ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold tracking-wide transition text-left ${
                 activeNav === item.id
                   ? "bg-[var(--color-gold)] text-black"
                   : "text-white/60 hover:text-white hover:bg-white/5"
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
         {/* User + sign out */}
         <div className="border-t border-white/10 px-4 py-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-[var(--color-gold)]/20 flex items-center justify-center text-[var(--color-gold)] text-sm font-black flex-shrink-0">
+            <div className="w-8 h-8 bg-[var(--color-gold)]/20 flex items-center justify-center text-[var(--color-gold)] text-sm font-black flex-shrink-0">
               {adminName.charAt(0)}
             </div>
             <div className="min-w-0">
@@ -299,13 +299,14 @@ export default function AdminDashboard() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Top bar */}
-        <header className="bg-[#f5f0eb] px-8 pt-8 pb-6 flex-shrink-0">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-gold)] font-bold mb-1">
-            Invoice Dashboard
-          </p>
-          <h1 className="text-2xl font-black text-gray-900">
-            Welcome back, <span className="text-[var(--color-gold)]">{adminName || "Admin"}</span>
-          </h1>
+        <header className="flex-shrink-0">
+          {/* Gold banner */}
+          <div className="bg-[var(--color-gold)] px-8 py-5">
+            <p className="text-xs uppercase tracking-[0.35em] text-black/60 font-bold">Invoice Dashboard</p>
+            <h1 className="text-3xl font-black text-black mt-0.5">
+              Welcome back, {adminName || "Admin"}
+            </h1>
+          </div>
         </header>
 
         {/* Scrollable body */}
@@ -334,7 +335,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Table card */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white rounded-none shadow-sm overflow-hidden border border-gray-100">
 
             {/* Table header / filters */}
             <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap gap-3 items-center">
@@ -346,7 +347,7 @@ export default function AdminDashboard() {
                 <input
                   type="text" placeholder="Search name or group…" value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[var(--color-gold)] w-52"
+                  className="bg-gray-50 border border-gray-200 rounded-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[var(--color-gold)] w-52"
                 />
               </div>
 
@@ -354,7 +355,7 @@ export default function AdminDashboard() {
               <select
                 value={weekFilter}
                 onChange={e => setWeekFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none appearance-none pr-7"
+                className="bg-gray-50 border border-gray-200 rounded-none px-3 py-2 text-sm text-gray-800 focus:outline-none appearance-none pr-7"
               >
                 <option value="all">All weeks</option>
                 {weeks.map(w => (
@@ -365,8 +366,8 @@ export default function AdminDashboard() {
               </select>
 
               {/* Status toggle */}
-              <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-bold uppercase tracking-wider">
-                {(["all", "unpaid", "paid"] as const).map(s => (
+              <div className="flex rounded-none border border-gray-200 overflow-hidden text-xs font-bold uppercase tracking-wider">
+                {(["unpaid", "all", "paid"] as const).map(s => (
                   <button
                     key={s} onClick={() => setStatusFilter(s)}
                     className={`px-3 py-2 transition ${
