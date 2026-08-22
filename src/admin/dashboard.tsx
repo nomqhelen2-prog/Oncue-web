@@ -155,7 +155,7 @@ export default function AdminDashboard() {
   const [invoices, setInvoices]         = useState<Invoice[]>([]);
   const [loading, setLoading]           = useState(true);
   const [search, setSearch]             = useState("");
-  const [weekFilter, setWeekFilter]     = useState<number | "all">(currentWeek());
+  const [weekFilter, setWeekFilter]     = useState<number | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">("unpaid");
   const [selected, setSelected]         = useState<Invoice | null>(null);
   const [sortDesc, setSortDesc]         = useState(true);
@@ -214,8 +214,8 @@ export default function AdminDashboard() {
     .filter(inv => {
       const week = getWeek(inv.submission_date || inv.created_at);
       if (weekFilter !== "all" && week !== weekFilter) return false;
-      if (statusFilter === "paid" && !inv.paid) return false;
-      if (statusFilter === "unpaid" && inv.paid) return false;
+      if (statusFilter === "paid" && inv.paid !== true) return false;
+      if (statusFilter === "unpaid" && inv.paid === true) return false;
       if (search) {
         const q = search.toLowerCase();
         const name = `${inv.first_name} ${inv.last_name}`.toLowerCase();
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="flex h-screen bg-[#f5f0eb] font-sans overflow-hidden">
+    <div className="flex h-screen bg-[#f5f0eb] font-sans overflow-hidden" style={{ WebkitOverflowScrolling: "touch" }}>
 
       {/* ── Mobile sidebar overlay ─────────────────────────────────────────── */}
       {sidebarOpen && (
@@ -343,7 +343,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-8 pb-8 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 pb-16 pt-4 sm:pt-6 space-y-4 sm:space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
 
           {/* Stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -416,10 +416,13 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Table — min-width forces horizontal scroll on mobile */}
+            <div style={{ minWidth: 720 }}>
+
             {/* Column headers */}
-            <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] border-b border-gray-100 bg-gray-50">
+            <div className="grid grid-cols-[200px_160px_110px_130px_130px_110px] border-b border-gray-100 bg-gray-50">
               {["Name", "Group / Job", "Job Type", "Submitted", "Total Owed", "Status"].map((h) => (
-                <div key={h} className="px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold">
+                <div key={h} className="px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold whitespace-nowrap">
                   {h === "Submitted" ? (
                     <button onClick={() => setSortDesc(!sortDesc)} className="flex items-center gap-1 hover:text-gray-800 transition">
                       {h} {sortDesc ? <ChevronDown size={11} /> : <ChevronUp size={11} />}
@@ -443,36 +446,36 @@ export default function AdminDashboard() {
                   <div
                     key={inv.id}
                     onClick={() => setSelected(inv)}
-                    className={`grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr] border-b border-gray-50 last:border-0 hover:bg-amber-50/60 cursor-pointer transition group ${
+                    className={`grid grid-cols-[200px_160px_110px_130px_130px_110px] border-b border-gray-50 last:border-0 hover:bg-amber-50/60 cursor-pointer transition group ${
                       idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                     }`}
                   >
-                    <div className="px-5 py-4">
-                      <p className="text-sm font-bold text-gray-900 group-hover:text-[#b8621a] transition">
+                    <div className="px-4 py-4">
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-[#b8621a] transition whitespace-nowrap overflow-hidden text-ellipsis">
                         {inv.first_name} {inv.last_name}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">{inv.email}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{inv.email}</p>
                     </div>
-                    <div className="px-5 py-4 flex items-center">
-                      <p className="text-sm text-gray-700 truncate">{inv.whatsapp_group || "—"}</p>
+                    <div className="px-4 py-4 flex items-center">
+                      <p className="text-sm text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis">{inv.whatsapp_group || "—"}</p>
                     </div>
-                    <div className="px-5 py-4 flex items-center">
-                      <span className="text-sm text-gray-700 capitalize">{inv.job_type || "—"}</span>
+                    <div className="px-4 py-4 flex items-center">
+                      <span className="text-sm text-gray-700 capitalize whitespace-nowrap">{inv.job_type || "—"}</span>
                     </div>
-                    <div className="px-5 py-4 flex items-center">
-                      <span className="text-sm text-gray-700">{fmtDate(inv.submission_date || inv.created_at)}</span>
+                    <div className="px-4 py-4 flex items-center">
+                      <span className="text-sm text-gray-700 whitespace-nowrap">{fmtDate(inv.submission_date || inv.created_at)}</span>
                     </div>
-                    <div className="px-5 py-4 flex items-center">
-                      <span className="text-sm font-bold text-gray-900">{fmt(inv.total_owed)}</span>
+                    <div className="px-4 py-4 flex items-center">
+                      <span className="text-sm font-bold text-gray-900 whitespace-nowrap">{fmt(inv.total_owed)}</span>
                     </div>
-                    <div className="px-5 py-4 flex items-center">
+                    <div className="px-4 py-4 flex items-center">
                       {inv.paid ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-green-700 bg-green-100 rounded-full px-2.5 py-1">
-                          <CheckCircle size={11} /> Paid
+                        <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-green-700 bg-green-100 px-2 py-1 whitespace-nowrap">
+                          <CheckCircle size={10} /> Paid
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-700 bg-amber-100 rounded-full px-2.5 py-1">
-                          <Clock size={11} /> Pending
+                        <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-1 whitespace-nowrap">
+                          <Clock size={10} /> Pending
                         </span>
                       )}
                     </div>
@@ -480,6 +483,7 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
+            </div>{/* end min-width wrapper */}
 
             {/* Footer */}
             {filtered.length > 0 && (
