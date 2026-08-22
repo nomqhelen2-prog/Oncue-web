@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, type Invoice } from "../lib/supabase";
 import {
-  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText,
+  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu,
 } from "lucide-react";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -162,6 +162,7 @@ export default function AdminDashboard() {
   const [adminEmail, setAdminEmail]     = useState("");
   const [adminName, setAdminName]       = useState("");
   const [activeNav]                     = useState("submissions");
+  const [sidebarOpen, setSidebarOpen]   = useState(false);
 
   // Auth guard + get admin name
   useEffect(() => {
@@ -239,60 +240,83 @@ export default function AdminDashboard() {
   // Table footer totals follow the current filter
   const filteredTotal = filtered.reduce((s, i) => s + (i.total_owed ?? 0), 0);
 
+  // Sidebar inner content — shared between desktop and mobile drawer
+  const sidebarContent = (
+    <>
+      {/* Logo */}
+      <div className="px-6 py-6 border-b border-white/10 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-[var(--color-gold)] flex items-center justify-center rounded-sm flex-shrink-0">
+            <img src="/logoonly.png" alt="" className="w-5 h-5 object-contain brightness-0" />
+          </div>
+          <span style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
+            className="text-sm tracking-widest text-white font-bold leading-tight">
+            OnCue <span className="font-black">MARKETING</span>
+          </span>
+        </div>
+        {/* Close button — mobile only */}
+        <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/50 hover:text-white transition">
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-5 flex flex-col gap-1">
+        {NAV.map(item => (
+          <button
+            key={item.id}
+            onClick={() => setSidebarOpen(false)}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold tracking-wide transition text-left ${
+              activeNav === item.id
+                ? "bg-[var(--color-gold)] text-black"
+                : "text-white/60 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* User + sign out */}
+      <div className="border-t border-white/10 px-4 py-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 bg-[var(--color-gold)]/20 flex items-center justify-center text-[var(--color-gold)] text-sm font-black flex-shrink-0">
+            {adminName.charAt(0)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-white text-sm font-semibold truncate">{adminName}</p>
+            <p className="text-white/40 text-xs truncate">{adminEmail}</p>
+          </div>
+        </div>
+        <button
+          onClick={signOut}
+          className="w-full flex items-center gap-2 text-white/50 hover:text-white text-xs uppercase tracking-widest transition py-1"
+        >
+          <LogOut size={13} /> Sign Out
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="flex h-screen bg-[#f5f0eb] font-sans overflow-hidden">
 
-      {/* ── Sidebar ───────────────────────────────────────────────────────── */}
-      <aside className="w-64 bg-black flex flex-col flex-shrink-0 h-full">
+      {/* ── Mobile sidebar overlay ─────────────────────────────────────────── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-        {/* Logo */}
-        <div className="px-6 py-6 border-b border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-[var(--color-gold)] flex items-center justify-center rounded-sm flex-shrink-0">
-              <img src="/logoonly.png" alt="" className="w-5 h-5 object-contain brightness-0" />
-            </div>
-            <span style={{ fontFamily: "'Montserrat', Arial, sans-serif" }}
-              className="text-sm tracking-widest text-white font-bold leading-tight">
-              OnCue <span className="font-black">MARKETING</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-5 flex flex-col gap-1">
-          {NAV.map(item => (
-            <button
-              key={item.id}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold tracking-wide transition text-left ${
-                activeNav === item.id
-                  ? "bg-[var(--color-gold)] text-black"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        {/* User + sign out */}
-        <div className="border-t border-white/10 px-4 py-5">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-[var(--color-gold)]/20 flex items-center justify-center text-[var(--color-gold)] text-sm font-black flex-shrink-0">
-              {adminName.charAt(0)}
-            </div>
-            <div className="min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{adminName}</p>
-              <p className="text-white/40 text-xs truncate">{adminEmail}</p>
-            </div>
-          </div>
-          <button
-            onClick={signOut}
-            className="w-full flex items-center gap-2 text-white/50 hover:text-white text-xs uppercase tracking-widest transition py-1"
-          >
-            <LogOut size={13} /> Sign Out
-          </button>
-        </div>
+      {/* ── Sidebar — desktop always visible, mobile slide-in ─────────────── */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72 bg-black flex flex-col h-full transition-transform duration-300
+        lg:relative lg:translate-x-0 lg:w-64 lg:flex-shrink-0
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
+        {sidebarContent}
       </aside>
 
       {/* ── Main content ──────────────────────────────────────────────────── */}
@@ -300,20 +324,29 @@ export default function AdminDashboard() {
 
         {/* Top bar */}
         <header className="flex-shrink-0">
-          {/* Gold banner */}
-          <div className="bg-[var(--color-gold)] px-8 py-5">
-            <p className="text-xs uppercase tracking-[0.35em] text-black/60 font-bold">Invoice Dashboard</p>
-            <h1 className="text-3xl font-black text-black mt-0.5">
-              Welcome back, {adminName || "Admin"}
-            </h1>
+          <div className="bg-[var(--color-gold)] px-5 sm:px-8 py-4 sm:py-5 flex items-center gap-4">
+            {/* Hamburger — mobile only */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-black/70 hover:text-black transition flex-shrink-0"
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
+            <div>
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-black/60 font-bold">Invoice Dashboard</p>
+              <h1 className="text-xl sm:text-3xl font-black text-black mt-0.5 leading-tight">
+                Welcome back, {adminName || "Admin"}
+              </h1>
+            </div>
           </div>
         </header>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 pb-8 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
 
           {/* Stat cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <StatCard
               label="Pending"
               value={String(pendingCount)}
@@ -335,10 +368,11 @@ export default function AdminDashboard() {
           </div>
 
           {/* Table card */}
-          <div className="bg-white rounded-none shadow-sm overflow-hidden border border-gray-100">
+          <div className="bg-white rounded-none shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
 
             {/* Table header / filters */}
-            <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap gap-3 items-center">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap gap-3 items-center">
               <h2 className="text-base font-black text-gray-900 mr-auto">All Submissions</h2>
 
               {/* Search */}
@@ -454,7 +488,8 @@ export default function AdminDashboard() {
                 <p className="text-xs font-bold text-gray-700">Total: <span className="text-gray-900">{fmt(filteredTotal)}</span></p>
               </div>
             )}
-          </div>
+          </div>{/* end overflow-x-auto */}
+          </div>{/* end table card */}
 
         </div>
       </div>

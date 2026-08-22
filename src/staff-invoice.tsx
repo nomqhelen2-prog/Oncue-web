@@ -106,9 +106,17 @@ function calcLabour(data: FormData): string {
 }
 
 // ── UI atoms ──────────────────────────────────────────────────────────────
+function Section({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-white/[0.05] border border-white/10 px-8 py-8">
+      {children}
+    </div>
+  );
+}
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[var(--color-gold)] text-xs uppercase tracking-[0.35em] font-bold mb-10 pb-3 border-b border-white/10">
+    <h2 className="text-[var(--color-gold)] text-xs uppercase tracking-[0.35em] font-bold mb-10 pb-3 border-b border-white/15">
       {children}
     </h2>
   );
@@ -119,13 +127,13 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     <div className="mb-12">
       <label className="block text-sm uppercase tracking-[0.18em] text-white font-bold mb-4">{label}</label>
       {children}
-      {hint && <p className="text-sm text-white/70 mt-3 leading-relaxed">{hint}</p>}
+      {hint && <p className="text-sm text-white/60 mt-3 leading-relaxed">{hint}</p>}
     </div>
   );
 }
 
-const inputCls = "w-full bg-transparent border-b border-white/20 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/50 transition-colors";
-const selectCls = "w-full bg-black border-b border-white/20 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
+const inputCls = "w-full bg-transparent border-b border-white/30 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/40 transition-colors";
+const selectCls = "w-full bg-transparent border-b border-white/30 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
 
 function RadioGrid({ options, value, onChange, cols = 3 }: {
   options: string[]; value: string; onChange: (v: string) => void; cols?: number;
@@ -298,9 +306,9 @@ export default function StaffInvoicePage() {
         <form onSubmit={handleSubmit} className="space-y-16">
 
           {/* ── Terms & Conditions ── */}
-          <div>
+          <Section>
             <SectionHeading>Terms &amp; Conditions</SectionHeading>
-            <div className="border border-white/10 h-64 overflow-y-auto p-6 text-sm text-white leading-relaxed whitespace-pre-line font-mono mb-6">
+            <div className="border border-white/15 h-64 overflow-y-auto p-6 text-sm text-white/80 leading-relaxed whitespace-pre-line font-mono mb-6 bg-black/30">
               {TERMS}
             </div>
             <button
@@ -314,10 +322,10 @@ export default function StaffInvoicePage() {
               </div>
               <span className="text-base text-white">I have read and agree to the Terms &amp; Conditions.</span>
             </button>
-          </div>
+          </Section>
 
           {/* ── Personal Details ── */}
-          <div>
+          <Section>
             <SectionHeading>Personal Details</SectionHeading>
             <div className="grid grid-cols-2 gap-8">
               <Field label="First Name">
@@ -364,10 +372,10 @@ export default function StaffInvoicePage() {
                 />
               </div>
             </Field>
-          </div>
+          </Section>
 
           {/* ── Banking Details ── */}
-          <div>
+          <Section>
             <SectionHeading>Banking Details</SectionHeading>
             <Field label="Bank Name">
               <select className={selectCls} value={data.bankName} onChange={e => upd({ bankName: e.target.value })} required>
@@ -395,10 +403,10 @@ export default function StaffInvoicePage() {
             <Field label="Account Type">
               <RadioGrid options={["Cheque / Current", "Savings"]} value={data.accountType} onChange={v => upd({ accountType: v })} cols={2} />
             </Field>
-          </div>
+          </Section>
 
           {/* ── Job Details ── */}
-          <div>
+          <Section>
             <SectionHeading>Job Details</SectionHeading>
             <Field label="WhatsApp Group Name" hint="Insert the WhatsApp group name for this job. If there was no group, write the brand and role — e.g. 'Merc Backup Promoter'">
               <input className={inputCls} value={data.whatsappGroup} onChange={e => upd({ whatsappGroup: e.target.value })} placeholder="e.g. Merc Brand Ambassador Dec" required />
@@ -450,7 +458,7 @@ export default function StaffInvoicePage() {
                   )}
                 </Field>
                 {Array.from({ length: dayCount }, (_, i) => (
-                  <div key={i} className="border border-white/10 p-6 mb-6">
+                  <div key={i} className="border border-white/15 bg-black/20 p-6 mb-6">
                     <p className="text-[var(--color-gold)] text-xs uppercase tracking-widest font-bold mb-6">Day {i + 1}</p>
                     <div className="grid grid-cols-2 gap-8">
                       <Field label="Hours Worked" hint="Use a full stop for part hours — e.g. 4.5">
@@ -489,11 +497,11 @@ export default function StaffInvoicePage() {
                 />
               </Field>
             )}
-          </div>
+          </Section>
 
           {/* ── Expenses ── */}
           {data.jobType && (
-            <div>
+            <Section>
               <SectionHeading>Expenses &amp; Deductions</SectionHeading>
 
               <Field label="Did You Have to Buy Anything for This Job?" hint="e.g. bubblewrap, tape, flowers, food (lunch drop)">
@@ -527,12 +535,12 @@ export default function StaffInvoicePage() {
                   <input className={inputCls} type="number" min="0" step="0.01" value={data.prepayAmount} onChange={e => upd({ prepayAmount: e.target.value })} placeholder="e.g. 200" />
                 </Field>
               )}
-            </div>
+            </Section>
           )}
 
           {/* ── Totals (auto-calculated, read-only) ── */}
           {data.jobType && (
-            <div>
+            <Section>
               <SectionHeading>Invoice Summary</SectionHeading>
               <div className="grid grid-cols-2 gap-8">
                 <Field label="Labour Total (ZAR)" hint="Auto-calculated — edit if needed">
@@ -542,7 +550,7 @@ export default function StaffInvoicePage() {
                   <input className={`${inputCls} font-bold text-[var(--color-gold)]`} type="number" min="0" step="0.01" value={data.totalOwed} onChange={e => upd({ totalOwed: e.target.value })} placeholder="0.00" />
                 </Field>
               </div>
-            </div>
+            </Section>
           )}
 
           {/* ── Submit ── */}
