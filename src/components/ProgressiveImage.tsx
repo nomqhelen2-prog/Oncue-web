@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { makeSrcSet, vercelImg } from "../lib/imgOptimize";
+import { makeSrcSet } from "../lib/imgOptimize";
 
 type Props = {
   src: string;
@@ -32,7 +32,8 @@ export function ProgressiveImage({
 }: Props) {
   const [loaded, setLoaded] = useState(false);
 
-  const optimizedSrc = vercelImg(src, 800);
+  // src is always the original URL — safe fallback if Vercel optimizer is unavailable.
+  // srcSet carries the optimized versions; browser picks the best one automatically.
   const srcSet = makeSrcSet(src);
 
   return (
@@ -43,7 +44,7 @@ export function ProgressiveImage({
       />
 
       <img
-        src={optimizedSrc}
+        src={src}
         srcSet={srcSet}
         sizes={sizes}
         alt={alt}
@@ -53,7 +54,7 @@ export function ProgressiveImage({
         decoding="async"
         style={objectPosition ? { objectPosition } : undefined}
         onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)} // don't leave skeleton up on 404
+        onError={() => setLoaded(true)} // don't leave skeleton up on broken image
       />
     </div>
   );

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { images } from "./assets/images";
 import { ProgressiveImage } from "./components/ProgressiveImage";
-import { vercelImg } from "./lib/imgOptimize";
 
 export default CollabPage;
 
@@ -41,7 +40,8 @@ function LogoCard({ name, logo, url }: { name: string; logo: string; url: string
             <div className="absolute inset-4 bg-gray-100 animate-pulse rounded-lg" />
           )}
           <img
-            src={vercelImg(logo, 400, 80)}
+            src={logo}
+            srcSet={`${logo} 1x`}
             alt={name}
             className={`w-4/5 h-4/5 object-contain transition-opacity duration-400 ${logoLoaded ? "opacity-100" : "opacity-0"}`}
             loading="lazy"
@@ -111,7 +111,7 @@ function CollabPage() {
         {/* Top: left-aligned text */}
         <div className="mb-10">
           <h2 className="text-4xl sm:text-6xl md:text-7xl font-black uppercase leading-[0.9] mb-6">
-            Brands We<br />Trust &amp; Partner With
+            Brands that have<br />Trusted Us
           </h2>
           <p className="text-white text-base leading-relaxed max-w-2xl mb-8">
             OnCue Marketing has proudly supported a range of brands and event agencies through
