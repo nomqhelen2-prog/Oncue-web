@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { images } from "./assets/images";
+import { ProgressiveImage } from "./components/ProgressiveImage";
 
 export default Index;
 
@@ -122,13 +123,15 @@ function Index() {
       <section id="home-overview" className="panel max-w-7xl mx-auto py-24 px-6 border-b border-white/10">
         <div className="grid md:grid-cols-12 gap-10 items-center">
           <div className="md:col-span-6">
-            <img
-              src={images.home.aboutImage}
-              alt="OnCue Marketing team"
-              className="w-full aspect-[4/3] object-cover object-center"
-              loading="lazy"
-              decoding="async"
-            />
+            <div className="w-full aspect-[4/3]">
+              <ProgressiveImage
+                src={images.home.aboutImage}
+                alt="OnCue Marketing team"
+                className="w-full h-full object-cover object-center"
+                skeletonClass="bg-gray-900"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
           </div>
           <div className="md:col-span-6">
 <h2 className="text-4xl md:text-6xl font-black mb-8 uppercase leading-tight">Who we are</h2>
@@ -169,12 +172,13 @@ function Index() {
             >
               {portfolioItems.map((item, idx) => (
                 <div key={idx} className="w-full flex-shrink-0 relative h-[600px]">
-                  <img
+                  <ProgressiveImage
                     src={item.img}
                     alt={item.client}
                     className="w-full h-full object-contain object-top bg-black"
-                    loading="lazy"
-                    decoding="async"
+                    skeletonClass="bg-gray-900"
+                    sizes="100vw"
+                    priority={idx === 0}
                   />
                   <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-8 py-6">
                     <p className="text-[var(--color-gold)] text-xs font-bold uppercase tracking-widest mb-1">

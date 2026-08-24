@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { images } from "./assets/images";
+import { ProgressiveImage } from "./components/ProgressiveImage";
+import { vercelImg } from "./lib/imgOptimize";
 
 export default CollabPage;
 
@@ -27,19 +29,27 @@ const CATEGORIES: Category[] = ["All", "Spirits & Beverages", "Luxury & Lifestyl
 
 function LogoCard({ name, logo, url }: { name: string; logo: string; url: string | null }) {
   const [failed, setFailed] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const initials = name.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 3);
 
   const inner = (
     <div className="aspect-[4/3] bg-white rounded-2xl relative flex items-center justify-center p-6 transition-all duration-300 group-hover:shadow-[0_0_0_2px_var(--color-gold)] group-hover:scale-[1.03] overflow-hidden">
       {logo && !failed ? (
-        <img
-          src={logo}
-          alt={name}
-          className="w-4/5 h-4/5 object-contain"
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
+        <>
+          {/* Skeleton pulse until logo loads */}
+          {!logoLoaded && (
+            <div className="absolute inset-4 bg-gray-100 animate-pulse rounded-lg" />
+          )}
+          <img
+            src={vercelImg(logo, 400, 80)}
+            alt={name}
+            className={`w-4/5 h-4/5 object-contain transition-opacity duration-400 ${logoLoaded ? "opacity-100" : "opacity-0"}`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => setFailed(true)}
+          />
+        </>
       ) : (
         <span className="text-black font-black text-lg tracking-widest text-center leading-tight">
           {initials}
@@ -160,7 +170,7 @@ function CollabPage() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 auto-rows-[400px]">
-          {collabs.map((c) => (
+          {collabs.map((c, idx) => (
             <figure
               key={c.name}
               className={`relative overflow-hidden rounded-3xl group cursor-pointer ${
@@ -171,12 +181,14 @@ function CollabPage() {
                   : "md:row-span-1"
               }`}
             >
-              <img
+              <ProgressiveImage
                 src={c.img}
                 alt={c.name}
-                className="w-full h-full object-cover object-[center_20%] transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                skeletonClass="bg-gray-900"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                objectPosition="center 20%"
+                priority={idx === 0}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
               <figcaption className="absolute bottom-6 left-6 text-white">

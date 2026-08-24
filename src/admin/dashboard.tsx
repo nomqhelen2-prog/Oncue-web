@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, type Invoice } from "../lib/supabase";
 import {
-  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu,
+  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu, Trash2,
 } from "lucide-react";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -23,8 +23,8 @@ function currentWeek() {
 }
 
 // ── Detail drawer ─────────────────────────────────────────────────────────────
-function DetailDrawer({ inv, onClose, onTogglePaid }: {
-  inv: Invoice; onClose: () => void; onTogglePaid: (id: string, paid: boolean) => void;
+function DetailDrawer({ inv, onClose, onTogglePaid, onDelete }: {
+  inv: Invoice; onClose: () => void; onTogglePaid: (id: string, paid: boolean) => void; onDelete: (id: string) => void;
 }) {
   const [notes, setNotes] = useState(inv.admin_notes || "");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -95,6 +95,13 @@ function DetailDrawer({ inv, onClose, onTogglePaid }: {
           }`}
         >
           {inv.paid ? "✓ Paid — Mark as Unpaid" : "Mark as Paid"}
+        </button>
+
+        <button
+          onClick={() => { onClose(); onDelete(inv.id); }}
+          className="w-full py-2.5 font-bold uppercase tracking-widest text-xs transition rounded-sm border border-red-900/40 text-red-400 hover:bg-red-950/40 flex items-center justify-center gap-2"
+        >
+          <Trash2 size={13} /> Delete Submission
         </button>
 
         <div className="divide-y divide-white/5">
@@ -203,6 +210,13 @@ export default function AdminDashboard() {
     }).eq("id", id);
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, paid, paid_at: paid ? new Date().toISOString() : null } : inv));
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, paid } : null);
+  }
+
+  async function deleteInvoice(id: string) {
+    if (!confirm("Delete this submission? This cannot be undone.")) return;
+    await supabase.from("invoices").delete().eq("id", id);
+    setInvoices(prev => prev.filter(inv => inv.id !== id));
+    if (selected?.id === id) setSelected(null);
   }
 
   async function signOut() {
@@ -417,11 +431,11 @@ export default function AdminDashboard() {
             </div>
 
             {/* Table — min-width forces horizontal scroll on mobile */}
-            <div style={{ minWidth: 720 }}>
+            <div style={{ minWidth: 768 }}>
 
             {/* Column headers */}
-            <div className="grid grid-cols-[200px_160px_110px_130px_130px_110px] border-b border-gray-100 bg-gray-50">
-              {["Name", "Group / Job", "Job Type", "Submitted", "Total Owed", "Status"].map((h) => (
+            <div className="grid grid-cols-[200px_160px_110px_130px_130px_110px_48px] border-b border-gray-100 bg-gray-50">
+              {["Name", "Group / Job", "Job Type", "Submitted", "Total Owed", "Status", ""].map((h) => (
                 <div key={h} className="px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold whitespace-nowrap">
                   {h === "Submitted" ? (
                     <button onClick={() => setSortDesc(!sortDesc)} className="flex items-center gap-1 hover:text-gray-800 transition">
@@ -446,7 +460,7 @@ export default function AdminDashboard() {
                   <div
                     key={inv.id}
                     onClick={() => setSelected(inv)}
-                    className={`grid grid-cols-[200px_160px_110px_130px_130px_110px] border-b border-gray-50 last:border-0 hover:bg-amber-50/60 cursor-pointer transition group ${
+                    className={`grid grid-cols-[200px_160px_110px_130px_130px_110px_48px] border-b border-gray-50 last:border-0 hover:bg-amber-50/60 cursor-pointer transition group ${
                       idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                     }`}
                   >
@@ -479,6 +493,15 @@ export default function AdminDashboard() {
                         </span>
                       )}
                     </div>
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}
+                        className="opacity-0 group-hover:opacity-100 transition text-gray-300 hover:text-red-500 p-1"
+                        title="Delete submission"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -506,6 +529,7 @@ export default function AdminDashboard() {
             togglePaid(id, paid);
             setSelected(prev => prev ? { ...prev, paid } : null);
           }}
+          onDelete={deleteInvoice}
         />
       )}
     </div>
