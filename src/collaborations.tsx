@@ -22,7 +22,7 @@ const brandLogos: { name: string; logo: string; url: string | null; category: Ca
   { name: "Homie Lover Friend x Bombay", logo: `${B}Homie_Lover_Friend_x_Bombay_Saphire_logo-removebg-preview.png`,       url: "https://www.bombaysapphire.com",     category: "Events & Entertainment" },
   { name: "Shaka Ilembe",                logo: `${B}shaka-removebg-preview.png`,                                          url: "https://www.shakailembe.co.za",      category: "Events & Entertainment" },
   { name: "Luxe Awards",                 logo: `${B}luxe-removebg-preview.png`,                                           url: null,                                 category: "Events & Entertainment" },
-  { name: "GWM",                         logo: "/images/women who move us-cropped.webp",                                    url: "https://www.gwm.co.za",              category: "Luxury & Lifestyle" },
+  { name: "GWM",                         logo: "/images/gwm-logo-clean.webp",                                               url: "https://www.gwm.co.za",              category: "Luxury & Lifestyle" },
   { name: "LDV",                         logo: "/images/ldv logo-cropped.webp",                                             url: "https://www.ldv.co.za",              category: "Luxury & Lifestyle" },
 ];
 
@@ -117,7 +117,7 @@ function CollabPage() {
           <h2 className="text-4xl sm:text-6xl md:text-7xl font-black uppercase leading-[0.9] mb-6">
             Brands that have<br />Trusted Us
           </h2>
-          <p className="text-white text-base leading-relaxed max-w-2xl mb-8">
+          <p className="text-white text-base leading-relaxed magit add .x-w-2xl mb-8">
             OnCue Marketing has proudly supported a range of brands and event agencies through
             professional staffing, brand activations and experiential marketing support. We welcome
             opportunities to collaborate with brands, agencies and event companies looking to deliver

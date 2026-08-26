@@ -349,39 +349,14 @@ export default function StaffInvoicePage() {
             <Field label="Email Address">
               <input className={inputCls} type="email" value={data.email} onChange={e => upd({ email: e.target.value })} placeholder="you@example.com" required />
             </Field>
-            <Field label="WhatsApp Number" hint="Select your country code, then enter your number without the leading zero.">
-              <div className="flex gap-3 items-end">
-                <select
-                  value={data.countryCode}
-                  onChange={e => upd({ countryCode: e.target.value })}
-                  className="bg-black border-b border-white/20 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none w-44 flex-shrink-0"
-                >
-                  {[
-                    ["+27",  "🇿🇦 +27  SA"],
-                    ["+263", "🇿🇼 +263 ZW"],
-                    ["+260", "🇿🇲 +260 ZM"],
-                    ["+267", "🇧🇼 +267 BW"],
-                    ["+264", "🇳🇦 +264 NA"],
-                    ["+258", "🇲🇿 +258 MZ"],
-                    ["+266", "🇱🇸 +266 LS"],
-                    ["+268", "🇸🇿 +268 SZ"],
-                    ["+254", "🇰🇪 +254 KE"],
-                    ["+234", "🇳🇬 +234 NG"],
-                    ["+233", "🇬🇭 +233 GH"],
-                    ["+44",  "🇬🇧 +44  UK"],
-                    ["+1",   "🇺🇸 +1   US"],
-                  ].map(([code, label]) => (
-                    <option key={code} value={code} className="bg-black">{label}</option>
-                  ))}
-                </select>
-                <input
-                  className={`${inputCls} flex-1`}
-                  value={data.whatsapp}
-                  onChange={e => upd({ whatsapp: e.target.value })}
-                  placeholder="821234567"
-                  required
-                />
-              </div>
+            <Field label="WhatsApp Number" hint="Enter your number without the leading zero (e.g. 821234567).">
+              <input
+                className={inputCls}
+                value={data.whatsapp}
+                onChange={e => upd({ whatsapp: e.target.value })}
+                placeholder="821234567"
+                required
+              />
             </Field>
           </Section>
 
@@ -422,8 +397,8 @@ export default function StaffInvoicePage() {
             <Field label="WhatsApp Group Name" hint="Insert the WhatsApp group name for this job. If there was no group, write the brand and role — e.g. 'Patrón Backup Promoter'">
               <input className={inputCls} value={data.whatsappGroup} onChange={e => upd({ whatsappGroup: e.target.value })} placeholder="e.g. Patrón Brand Ambassador Dec" required />
             </Field>
-            <Field label="Date(s) of Job / Event" hint="Enter the date the activation or event took place. For multiple days, list all dates — e.g. 12 Aug, 13 Aug 2026">
-              <input className={inputCls} value={data.jobDate} onChange={e => upd({ jobDate: e.target.value })} placeholder="e.g. 12 August 2026" required />
+            <Field label="Date(s) of Job / Event" hint="Enter the date(s) the job took place. For multiple days, list all dates — e.g. 13/09/2026, 14/09/2026">
+              <input className={inputCls} value={data.jobDate} onChange={e => upd({ jobDate: e.target.value })} placeholder="e.g. 13/09/2026" required />
             </Field>
             <Field label="Job Type">
               <RadioGrid
@@ -503,11 +478,11 @@ export default function StaffInvoicePage() {
 
             {/* Stores worked — shown once job type is selected */}
             {data.jobType && (
-              <Field label="Stores / Venues Worked" hint="Brand name and mall — e.g. 'Vodacom Fourways Mall'. Add (return) if you revisited a store.">
+              <Field label="Stores / Venues Worked" hint="Brand name and venue — e.g. 'Patrón Sandton City'. Add (return) if you revisited a venue.">
                 <textarea
                   className={`${inputCls} resize-none`} rows={4}
                   value={data.storeList} onChange={e => upd({ storeList: e.target.value })}
-                  placeholder={"e.g.\nVodacom Fourways Mall\nSamsung Sandton City (return)"}
+                  placeholder={"e.g.\nPatrón Sandton City\nNespresso Mall of Africa (return)"}
                 />
               </Field>
             )}
