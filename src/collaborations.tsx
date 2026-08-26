@@ -22,7 +22,7 @@ const brandLogos: { name: string; logo: string; url: string | null; category: Ca
   { name: "Homie Lover Friend x Bombay", logo: `${B}Homie_Lover_Friend_x_Bombay_Saphire_logo-removebg-preview.png`,       url: "https://www.bombaysapphire.com",     category: "Events & Entertainment" },
   { name: "Shaka Ilembe",                logo: `${B}shaka-removebg-preview.png`,                                          url: "https://www.shakailembe.co.za",      category: "Events & Entertainment" },
   { name: "Luxe Awards",                 logo: `${B}luxe-removebg-preview.png`,                                           url: null,                                 category: "Events & Entertainment" },
-  { name: "GWM",                         logo: "/images/gwm-logo-clean.webp",                                               url: "https://www.gwm.co.za",              category: "Luxury & Lifestyle" },
+  { name: "GWM",                         logo: "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/women%20who%20move%20us-cropped.webp", url: "https://www.gwm.co.za", category: "Luxury & Lifestyle" },
   { name: "LDV",                         logo: "/images/ldv logo-cropped.webp",                                             url: "https://www.ldv.co.za",              category: "Luxury & Lifestyle" },
 ];
 
