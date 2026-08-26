@@ -59,7 +59,7 @@ export default async function handler(req: any, res: any) {
     const { data: settings } = await supabase
       .from("admin_settings").select("whatsapp_enabled").eq("id", 1).single();
 
-    if (settings?.whatsapp_enabled && process.env.CALLMEBOT_PHONE && process.env.CALLMEBOT_API_KEY) {
+    if (settings?.whatsapp_enabled && process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
       const name   = `${fields["First Name"] ?? ""} ${fields["Last Name"] ?? ""}`.trim();
       const amount = fields["Total Owed (ZAR)"] ?? "—";
       const group  = fields["WhatsApp Group"] ?? "—";

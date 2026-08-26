@@ -3,21 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ArrowLeft, Bell, BellOff, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
-// ── Supabase settings row ─────────────────────────────────────────────────────
-// Run this SQL in Supabase once:
-//
-//   CREATE TABLE IF NOT EXISTS admin_settings (
-//     id int PRIMARY KEY DEFAULT 1,
-//     whatsapp_enabled boolean DEFAULT true,
-//     updated_at timestamptz DEFAULT now()
-//   );
-//   INSERT INTO admin_settings (id, whatsapp_enabled)
-//     VALUES (1, true) ON CONFLICT DO NOTHING;
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function AdminSettings() {
   const navigate = useNavigate();
-  const [waEnabled, setWaEnabled]   = useState(true);
+  const [enabled, setEnabled]       = useState(true);
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
   const [testing, setTesting]       = useState(false);
@@ -31,22 +19,22 @@ export default function AdminSettings() {
     });
   }, []);
 
-  // Load settings
+  // Load settings (reuses existing whatsapp_enabled column)
   useEffect(() => {
     supabase.from("admin_settings").select("whatsapp_enabled").eq("id", 1).single()
       .then(({ data }) => {
-        if (data) setWaEnabled(data.whatsapp_enabled ?? true);
+        if (data) setEnabled(data.whatsapp_enabled ?? true);
         setLoading(false);
       });
   }, []);
 
   async function saveToggle(val: boolean) {
     setSaving(true);
-    setWaEnabled(val);
+    setEnabled(val);
     await supabase.from("admin_settings")
       .upsert({ id: 1, whatsapp_enabled: val, updated_at: new Date().toISOString() });
     setSaving(false);
-    showToast(val ? "WhatsApp alerts enabled" : "WhatsApp alerts paused");
+    showToast(val ? "Email notifications enabled" : "Email notifications paused");
   }
 
   async function sendTest() {
@@ -85,37 +73,36 @@ export default function AdminSettings() {
 
       <div className="max-w-2xl mx-auto px-6 py-10 space-y-6">
 
-        {/* WhatsApp notifications card */}
+        {/* Email notifications card */}
         <div className="bg-white border border-gray-100 shadow-sm p-6">
           <div className="flex items-start justify-between mb-1">
             <div className="flex items-center gap-3">
-              {waEnabled
+              {enabled
                 ? <Bell size={18} className="text-green-600 flex-shrink-0" />
                 : <BellOff size={18} className="text-gray-400 flex-shrink-0" />}
               <div>
-                <p className="font-black text-gray-900 text-sm uppercase tracking-wide">WhatsApp Notifications</p>
+                <p className="font-black text-gray-900 text-sm uppercase tracking-wide">Email Notifications</p>
                 <p className="text-gray-500 text-xs mt-0.5">
-                  Receive a WhatsApp message each time a staff member submits an invoice.
+                  Receive an email each time a staff member submits an invoice.
                 </p>
               </div>
             </div>
             {/* Toggle */}
             <button
               disabled={loading || saving}
-              onClick={() => saveToggle(!waEnabled)}
+              onClick={() => saveToggle(!enabled)}
               className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
-                waEnabled ? "bg-green-500" : "bg-gray-300"
+                enabled ? "bg-green-500" : "bg-gray-300"
               }`}
             >
               <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200 ${
-                waEnabled ? "translate-x-6" : "translate-x-1"
+                enabled ? "translate-x-6" : "translate-x-1"
               }`} />
             </button>
           </div>
 
-          {/* Status */}
-          <p className={`text-xs font-bold mt-4 ${waEnabled ? "text-green-600" : "text-gray-400"}`}>
-            {loading ? "Loading…" : saving ? "Saving…" : waEnabled ? "● Active" : "○ Paused"}
+          <p className={`text-xs font-bold mt-4 ${enabled ? "text-green-600" : "text-gray-400"}`}>
+            {loading ? "Loading…" : saving ? "Saving…" : enabled ? "● Active" : "○ Paused"}
           </p>
 
           {/* Test button */}
@@ -126,11 +113,11 @@ export default function AdminSettings() {
               className="flex items-center gap-2 bg-black text-white text-xs uppercase tracking-widest font-bold px-4 py-2.5 hover:bg-gray-800 transition disabled:opacity-40"
             >
               {testing ? <Loader2 size={13} className="animate-spin" /> : null}
-              Send Test Message
+              Send Test Email
             </button>
             {testResult === "ok" && (
               <span className="flex items-center gap-1 text-green-600 text-xs font-bold">
-                <CheckCircle size={13} /> Sent!
+                <CheckCircle size={13} /> Sent! Check your inbox.
               </span>
             )}
             {testResult === "err" && (
@@ -144,27 +131,29 @@ export default function AdminSettings() {
         {/* Setup guide */}
         <div className="bg-white border border-gray-100 shadow-sm p-6">
           <p className="font-black text-gray-900 text-sm uppercase tracking-wide mb-4">Setup Guide</p>
-          <ol className="space-y-3 text-sm text-gray-700 list-decimal list-inside leading-relaxed">
+          <ol className="space-y-4 text-sm text-gray-700 list-decimal list-inside leading-relaxed">
             <li>
-              On WhatsApp, send this message to <strong>+34 644 52 76 27</strong>:
-              <code className="block mt-1 bg-gray-50 border border-gray-200 px-3 py-2 text-xs font-mono rounded">
-                I allow callmebot to send me messages
-              </code>
+              Go to <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold">resend.com</a> and create a free account.
             </li>
-            <li>You'll receive a reply with your personal <strong>API key</strong>.</li>
+            <li>
+              In your Resend dashboard, create an <strong>API Key</strong>.
+            </li>
             <li>
               In Vercel → Project → Settings → Environment Variables, add:
               <div className="mt-2 space-y-1">
                 <code className="block bg-gray-50 border border-gray-200 px-3 py-2 text-xs font-mono rounded">
-                  CALLMEBOT_PHONE = your number (e.g. 27821234567)
+                  RESEND_API_KEY = your key from step 2
                 </code>
                 <code className="block bg-gray-50 border border-gray-200 px-3 py-2 text-xs font-mono rounded">
-                  CALLMEBOT_API_KEY = key from step 2
+                  ADMIN_EMAIL = the email to receive notifications
                 </code>
               </div>
             </li>
-            <li>Redeploy, then click <strong>Send Test Message</strong> above to confirm.</li>
+            <li>Redeploy, then click <strong>Send Test Email</strong> above to confirm.</li>
           </ol>
+          <p className="text-xs text-gray-400 mt-4">
+            Optional: verify <strong>oncuemarketing.co.za</strong> in Resend to send from your own domain, then add <code className="bg-gray-100 px-1 rounded">RESEND_FROM = notifications@oncuemarketing.co.za</code> in Vercel.
+          </p>
         </div>
 
         {/* Supabase setup note */}
