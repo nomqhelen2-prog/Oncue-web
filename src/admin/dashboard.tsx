@@ -166,10 +166,13 @@ function exportCSV(invoices: Invoice[], label: string) {
     "Status","Submission Date",
   ];
 
+  // Force text for fields Excel would misformat (phone numbers, long IDs)
+  const asText = (v: unknown) => `="${String(v ?? "").replace(/"/g, '""')}"`;
+
   const rows = invoices.map(inv => [
     `${inv.first_name ?? ""} ${inv.last_name ?? ""}`.trim(),
     inv.email ?? "",
-    inv.whatsapp ?? "",
+    asText(inv.whatsapp ?? ""),
     inv.submission_date ?? inv.created_at?.split("T")[0] ?? "",
     inv.whatsapp_group ?? "",
     inv.job_type ?? "",
@@ -184,8 +187,8 @@ function exportCSV(invoices: Invoice[], label: string) {
     inv.total_owed ?? "",
     inv.bank_name ?? "",
     inv.account_holder ?? "",
-    inv.account_number ?? "",
-    inv.branch_code ?? "",
+    asText(inv.account_number ?? ""),
+    asText(inv.branch_code ?? ""),
     inv.account_type ?? "",
     inv.paid ? "Paid" : "Unpaid",
     inv.created_at?.split("T")[0] ?? "",
@@ -195,7 +198,8 @@ function exportCSV(invoices: Invoice[], label: string) {
     .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
     .join("\n");
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const BOM  = "﻿"; // UTF-8 BOM — makes Excel open with correct encoding
+  const blob = new Blob([BOM + csv], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href     = url;

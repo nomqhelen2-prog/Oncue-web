@@ -128,50 +128,6 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* Setup guide */}
-        <div className="bg-white border border-gray-100 shadow-sm p-6">
-          <p className="font-black text-gray-900 text-sm uppercase tracking-wide mb-4">Setup Guide</p>
-          <ol className="space-y-4 text-sm text-gray-700 list-decimal list-inside leading-relaxed">
-            <li>
-              Go to <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold">resend.com</a> and create a free account.
-            </li>
-            <li>
-              In your Resend dashboard, create an <strong>API Key</strong>.
-            </li>
-            <li>
-              In Vercel → Project → Settings → Environment Variables, add:
-              <div className="mt-2 space-y-1">
-                <code className="block bg-gray-50 border border-gray-200 px-3 py-2 text-xs font-mono rounded">
-                  RESEND_API_KEY = your key from step 2
-                </code>
-                <code className="block bg-gray-50 border border-gray-200 px-3 py-2 text-xs font-mono rounded">
-                  ADMIN_EMAIL = the email to receive notifications
-                </code>
-              </div>
-            </li>
-            <li>Redeploy, then click <strong>Send Test Email</strong> above to confirm.</li>
-          </ol>
-          <p className="text-xs text-gray-400 mt-4">
-            Optional: verify <strong>oncuemarketing.co.za</strong> in Resend to send from your own domain, then add <code className="bg-gray-100 px-1 rounded">RESEND_FROM = notifications@oncuemarketing.co.za</code> in Vercel.
-          </p>
-        </div>
-
-        {/* Supabase setup note */}
-        <div className="bg-amber-50 border border-amber-200 p-5 text-sm text-amber-900">
-          <p className="font-bold mb-2">One-time Supabase setup</p>
-          <p className="mb-2 text-xs leading-relaxed">
-            Run this SQL once in Supabase → SQL Editor to enable the toggle:
-          </p>
-          <code className="block bg-amber-100 border border-amber-200 px-3 py-3 text-xs font-mono whitespace-pre leading-relaxed rounded">
-{`CREATE TABLE IF NOT EXISTS admin_settings (
-  id int PRIMARY KEY DEFAULT 1,
-  whatsapp_enabled boolean DEFAULT true,
-  updated_at timestamptz DEFAULT now()
-);
-INSERT INTO admin_settings (id, whatsapp_enabled)
-  VALUES (1, true) ON CONFLICT DO NOTHING;`}
-          </code>
-        </div>
 
       </div>
 
