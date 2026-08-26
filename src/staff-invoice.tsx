@@ -2,40 +2,49 @@ import { useState, useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 
 // ── T&Cs ──────────────────────────────────────────────────────────────────
-const TERMS = `SHIFT NOTIFICATION
-• Notify the agency at least 48 hours in advance if you cannot work a shift.
-• SMS, voicemail and messages via friends are NOT acceptable notice.
-• Failure to arrive results in immediate blacklisting and forfeiture of payment.
-• Fines equal to the monetary value of the missed assignment apply.
+const TERMS = `ONCUE MARKETING — PROMOTER TERMS & CONDITIONS
+
+These terms apply to all activations and events including, but not limited to, campaigns run for Rolex, Patrón, Nespresso, D'Ussé, FNB, Bombay Sapphire, Comfort, Ayoosh, Formula 1, Luxe Awards, and all other OnCue Marketing clients.
+
+SHIFT NOTIFICATION
+• Notify OnCue Marketing at least 48 hours in advance if you cannot work a shift.
+• SMS, voicemail and messages via friends are NOT acceptable notice — contact your coordinator directly via WhatsApp.
+• Failure to arrive without proper notice results in immediate blacklisting and forfeiture of all outstanding payment.
+• A penalty equal to the full monetary value of the missed shift applies.
 
 PUNCTUALITY
-• Arrive 30 minutes before the promotion starts for setup and agency notification.
-• Late arrival incurs a 1-hour pay fine.
-• A second late arrival leads to blacklisting and forfeiture of owed payments.
+• Arrive at least 30 minutes before the activation or event starts for setup and briefing.
+• Late arrival of any kind incurs a 1-hour pay deduction.
+• A second late arrival results in blacklisting and forfeiture of all owed payments.
 
-COMMUNICATION
-• No direct communication with clients or potential clients during promotions.
-• All work-related matters must be referred back to the agency.
-• Violation may result in booking fee claims and immediate blacklisting.
+COMMUNICATION & CLIENT RELATIONS
+• No direct communication with brand clients (e.g. Rolex, Patrón, Nespresso representatives) during activations unless specifically instructed.
+• All brand-related queries, complaints or opportunities must be referred back to OnCue Marketing immediately.
+• Soliciting work directly from OnCue Marketing clients is a serious violation and may result in legal action.
+• Violation of this policy results in immediate blacklisting and a booking fee claim.
 
 PROFESSIONAL CONDUCT
-• Maintain professionalism as a brand representative at all times.
-• Adhere to proper dress code; failure results in a R50 penalty.
-• Full liability for any damaged or missing promotional items.
+• You are representing premium brands. Maintain the highest level of professionalism at all times.
+• Adhere strictly to the dress code and brand guidelines provided per activation.
+• Non-compliance with dress code incurs a R50 penalty per occurrence.
+• You are fully liable for any damaged, lost or missing promotional items, equipment or brand assets.
 
-REPORTING & FEEDBACK
-• Provide photos as proof of completed promotions.
-• Late feedback incurs a R50 penalty per day.
+REPORTING & PROOF OF WORK
+• Photos and check-in confirmations are required as proof of completed activations.
+• All photos must be submitted to your WhatsApp group by end of shift.
+• Late feedback incurs a R50 penalty per day until submitted.
 
-WORK ENVIRONMENT
-• Creating a negative work environment results in a R200 fine.
-• No smoking, drinking, gum-chewing or phone use during promotions (R100 fine).
-• Discussing company matters or bad-mouthing the agency: R300 fine and dismissal.
-• Discussing payment with clients or fellow promoters: R200 fine.
+CONDUCT ON SITE
+• Creating a hostile or negative work environment: R200 fine.
+• Smoking, drinking, chewing gum or using your personal phone during an activation: R100 fine.
+• Discussing internal company matters, pay rates or bad-mouthing OnCue Marketing or its clients: R300 fine and immediate dismissal.
+• Discussing payment amounts with clients or fellow promoters: R200 fine.
 
-BY AGREEING, I CONFIRM:
-• My monthly income does not exceed the maximum allowed by SARS for tax deductions.
-• I will adhere to all promotion rules and regulations, with penalties at the agency's discretion.`;
+BY AGREEING TO THESE TERMS, I CONFIRM:
+• I am an independent contractor and my monthly income does not exceed the SARS threshold requiring PAYE deductions.
+• I have read, understood and will comply with all OnCue Marketing policies and client-specific brand guidelines.
+• I accept that all penalties are enforceable at OnCue Marketing's sole discretion.
+• The information submitted in this invoice is accurate and truthful.`;
 
 // ── Types ─────────────────────────────────────────────────────────────────
 interface FormData {
@@ -45,6 +54,7 @@ interface FormData {
   bankName: string; accountHolder: string; accountNumber: string;
   branchCode: string; accountType: string;
   whatsappGroup: string;
+  jobDate: string;
   jobType: "" | "daily" | "hourly" | "fixed" | "setup";
   dailyRate: string; daysWorked: string; daysOtherValue: string;
   dayHours: string[]; dayRates: string[];
@@ -63,7 +73,7 @@ const EMPTY: FormData = {
   countryCode: "+27", whatsapp: "",
   bankName: "", accountHolder: "", accountNumber: "",
   branchCode: "", accountType: "",
-  whatsappGroup: "", jobType: "",
+  whatsappGroup: "", jobDate: "", jobType: "",
   dailyRate: "", daysWorked: "", daysOtherValue: "",
   dayHours: [], dayRates: [],
   fixedRate: "", setupRate: "",
@@ -133,7 +143,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 }
 
 const inputCls = "w-full bg-transparent border-b border-white/30 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/40 transition-colors";
-const selectCls = "w-full bg-transparent border-b border-white/30 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
+const selectCls = "w-full bg-black border-b border-white/30 py-3 text-white text-base focus:outline-none focus:border-[var(--color-gold)] transition-colors appearance-none";
 
 function RadioGrid({ options, value, onChange, cols = 3 }: {
   options: string[]; value: string; onChange: (v: string) => void; cols?: number;
@@ -234,6 +244,7 @@ export default function StaffInvoicePage() {
       "Account Number": data.accountNumber, "Branch Code": data.branchCode,
       "Account Type": data.accountType,
       "WhatsApp Group": data.whatsappGroup,
+      "Job Date": data.jobDate,
       "Job Type": data.jobType,
       "Daily Rate (ZAR)": data.dailyRate || "",
       "Days Worked": data.daysWorked === "Other" ? data.daysOtherValue : data.daysWorked,
@@ -276,8 +287,8 @@ export default function StaffInvoicePage() {
           <CheckCircle className="w-14 h-14 text-[var(--color-gold)] mx-auto mb-6" />
           <h1 className="text-2xl font-black uppercase tracking-widest text-white mb-4">Invoice Submitted</h1>
           <p className="text-white/50 text-sm leading-relaxed">
-            Your invoice has been received. Payments are processed every{" "}
-            <strong className="text-white">Wednesday</strong> — late submissions carry over to the following week.
+            Your invoice has been received. Payments are processed within{" "}
+            <strong className="text-white">2 weeks</strong> of submission.
           </p>
         </div>
       </div>
@@ -299,7 +310,7 @@ export default function StaffInvoicePage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tight mb-4">Invoice Submission</h1>
           <p className="text-white/60 text-base">
-            Payments are made every <span className="text-white font-bold">Wednesday</span>. Submit as soon as the job is complete.
+            Payments are made within <span className="text-white font-bold">2 weeks</span> of invoice submission. Submit as soon as the job is complete.
           </p>
         </div>
 
@@ -308,7 +319,7 @@ export default function StaffInvoicePage() {
           {/* ── Terms & Conditions ── */}
           <Section>
             <SectionHeading>Terms &amp; Conditions</SectionHeading>
-            <div className="border border-white/15 h-64 overflow-y-auto p-6 text-sm text-white/80 leading-relaxed whitespace-pre-line font-mono mb-6 bg-black/30">
+            <div className="border border-white/15 h-64 overflow-y-auto p-6 text-sm text-white/80 leading-relaxed whitespace-pre-line mb-6 bg-black/30" style={{ fontFamily: "'Cormorant Garamond', serif", letterSpacing: "0.02em" }}>
               {TERMS}
             </div>
             <button
@@ -379,13 +390,13 @@ export default function StaffInvoicePage() {
             <SectionHeading>Banking Details</SectionHeading>
             <Field label="Bank Name">
               <select className={selectCls} value={data.bankName} onChange={e => upd({ bankName: e.target.value })} required>
-                <option value="">Select bank…</option>
+                <option value="" className="bg-black">Select bank…</option>
                 {[
                   "FNB","Standard Bank","ABSA","Nedbank","Capitec",
                   "TymeBank","Discovery Bank","African Bank","Bank Zero",
                   "Investec","NMB Bank","Sasfin","Grindrod Bank","Other"
                 ].map(b => (
-                  <option key={b} value={b}>{b}</option>
+                  <option key={b} value={b} className="bg-black">{b}</option>
                 ))}
               </select>
             </Field>
@@ -408,8 +419,11 @@ export default function StaffInvoicePage() {
           {/* ── Job Details ── */}
           <Section>
             <SectionHeading>Job Details</SectionHeading>
-            <Field label="WhatsApp Group Name" hint="Insert the WhatsApp group name for this job. If there was no group, write the brand and role — e.g. 'Merc Backup Promoter'">
-              <input className={inputCls} value={data.whatsappGroup} onChange={e => upd({ whatsappGroup: e.target.value })} placeholder="e.g. Merc Brand Ambassador Dec" required />
+            <Field label="WhatsApp Group Name" hint="Insert the WhatsApp group name for this job. If there was no group, write the brand and role — e.g. 'Patrón Backup Promoter'">
+              <input className={inputCls} value={data.whatsappGroup} onChange={e => upd({ whatsappGroup: e.target.value })} placeholder="e.g. Patrón Brand Ambassador Dec" required />
+            </Field>
+            <Field label="Date(s) of Job / Event" hint="Enter the date the activation or event took place. For multiple days, list all dates — e.g. 12 Aug, 13 Aug 2026">
+              <input className={inputCls} value={data.jobDate} onChange={e => upd({ jobDate: e.target.value })} placeholder="e.g. 12 August 2026" required />
             </Field>
             <Field label="Job Type">
               <RadioGrid
@@ -543,11 +557,11 @@ export default function StaffInvoicePage() {
             <Section>
               <SectionHeading>Invoice Summary</SectionHeading>
               <div className="grid grid-cols-2 gap-8">
-                <Field label="Labour Total (ZAR)" hint="Auto-calculated — edit if needed">
-                  <input className={inputCls} type="number" min="0" step="0.01" value={data.labourTotal} onChange={e => upd({ labourTotal: e.target.value })} placeholder="0.00" />
+                <Field label="Labour Total (ZAR)" hint="Auto-calculated">
+                  <input className={`${inputCls} cursor-not-allowed opacity-70`} type="number" value={data.labourTotal} placeholder="0.00" readOnly tabIndex={-1} />
                 </Field>
-                <Field label="Total Owed (ZAR)" hint="Auto-calculated — edit if needed">
-                  <input className={`${inputCls} font-bold text-[var(--color-gold)]`} type="number" min="0" step="0.01" value={data.totalOwed} onChange={e => upd({ totalOwed: e.target.value })} placeholder="0.00" />
+                <Field label="Total Owed (ZAR)" hint="Auto-calculated">
+                  <input className={`${inputCls} font-bold text-[var(--color-gold)] cursor-not-allowed opacity-70`} type="number" value={data.totalOwed} placeholder="0.00" readOnly tabIndex={-1} />
                 </Field>
               </div>
             </Section>

@@ -11,6 +11,7 @@ import ContactPage from './contact'
 import StaffInvoicePage from './staff-invoice'
 import AdminLogin from './admin/login'
 import AdminDashboard from './admin/dashboard'
+import AdminSettings from './admin/settings'
 import PrivacyPage from './privacy'
 import TermsPage from './terms'
 import {SiteLayout} from '../components/SiteLayout'
@@ -24,6 +25,7 @@ function App() {
       {/* Admin — no nav/footer */}
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/settings" element={<AdminSettings />} />
 
       {/* Public site */}
       <Route path="/*" element={

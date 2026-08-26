@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase, type Invoice } from "../lib/supabase";
 import {
-  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu, Trash2,
+  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu, Trash2, Download, Settings,
 } from "lucide-react";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -156,6 +156,54 @@ const NAV: NavItem[] = [
   { id: "submissions", label: "Submissions", icon: <FileText size={17} /> },
 ];
 
+// ── CSV export ────────────────────────────────────────────────────────────────
+function exportCSV(invoices: Invoice[], label: string) {
+  const headers = [
+    "Name","Email","WhatsApp","Job Date","WhatsApp Group","Job Type",
+    "Daily Rate","Days Worked","Fixed Rate","Setup Rate",
+    "Labour Total","Purchase Amount","Fuel Amount","Pre-Pay Amount",
+    "Total Owed","Bank","Account Holder","Account Number","Branch Code","Account Type",
+    "Status","Submission Date",
+  ];
+
+  const rows = invoices.map(inv => [
+    `${inv.first_name ?? ""} ${inv.last_name ?? ""}`.trim(),
+    inv.email ?? "",
+    inv.whatsapp ?? "",
+    inv.submission_date ?? inv.created_at?.split("T")[0] ?? "",
+    inv.whatsapp_group ?? "",
+    inv.job_type ?? "",
+    inv.daily_rate ?? "",
+    inv.days_worked ?? "",
+    inv.fixed_rate ?? "",
+    inv.setup_rate ?? "",
+    inv.labour_total ?? "",
+    inv.purchase_amount ?? "",
+    inv.fuel_amount ?? "",
+    inv.pre_pay_amount ?? "",
+    inv.total_owed ?? "",
+    inv.bank_name ?? "",
+    inv.account_holder ?? "",
+    inv.account_number ?? "",
+    inv.branch_code ?? "",
+    inv.account_type ?? "",
+    inv.paid ? "Paid" : "Unpaid",
+    inv.created_at?.split("T")[0] ?? "",
+  ]);
+
+  const csv = [headers, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `oncue-invoices-${label}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Main dashboard ────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -170,6 +218,7 @@ export default function AdminDashboard() {
   const [adminName, setAdminName]       = useState("");
   const [activeNav]                     = useState("submissions");
   const [sidebarOpen, setSidebarOpen]   = useState(false);
+  const [monthFilter, setMonthFilter]   = useState<string>("all"); // "all" or "YYYY-MM"
 
   // Auth guard + get admin name
   useEffect(() => {
@@ -228,6 +277,10 @@ export default function AdminDashboard() {
     .filter(inv => {
       const week = getWeek(inv.submission_date || inv.created_at);
       if (weekFilter !== "all" && week !== weekFilter) return false;
+      if (monthFilter !== "all") {
+        const m = (inv.submission_date || inv.created_at || "").slice(0, 7);
+        if (m !== monthFilter) return false;
+      }
       if (statusFilter === "paid" && inv.paid !== true) return false;
       if (statusFilter === "unpaid" && inv.paid === true) return false;
       if (search) {
@@ -243,7 +296,8 @@ export default function AdminDashboard() {
       return sortDesc ? db - da : da - db;
     });
 
-  const weeks        = Array.from(new Set(invoices.map(i => getWeek(i.submission_date || i.created_at)))).sort((a, b) => b - a);
+  const weeks  = Array.from(new Set(invoices.map(i => getWeek(i.submission_date || i.created_at)))).sort((a, b) => b - a);
+  const months = Array.from(new Set(invoices.map(i => (i.submission_date || i.created_at || "").slice(0, 7)))).filter(Boolean).sort().reverse();
 
   // Stat cards always reflect ALL invoices (global overview)
   const pendingCount  = invoices.filter(i => !i.paid).length;
@@ -291,6 +345,16 @@ export default function AdminDashboard() {
           </button>
         ))}
       </nav>
+
+      {/* Settings link */}
+      <div className="px-3 pb-2">
+        <Link
+          to="/admin/settings"
+          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold tracking-wide text-white/60 hover:text-white hover:bg-white/5 transition"
+        >
+          <Settings size={17} /> Settings
+        </Link>
+      </div>
 
       {/* User + sign out */}
       <div className="border-t border-white/10 px-4 py-5">
@@ -399,6 +463,20 @@ export default function AdminDashboard() {
                 />
               </div>
 
+              {/* Month filter */}
+              <select
+                value={monthFilter}
+                onChange={e => setMonthFilter(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-none px-3 py-2 text-sm text-gray-800 focus:outline-none appearance-none pr-7"
+              >
+                <option value="all">All months</option>
+                {months.map(m => (
+                  <option key={m} value={m}>
+                    {new Date(m + "-01").toLocaleDateString("en-ZA", { month: "long", year: "numeric" })}
+                  </option>
+                ))}
+              </select>
+
               {/* Week filter */}
               <select
                 value={weekFilter}
@@ -412,6 +490,18 @@ export default function AdminDashboard() {
                   </option>
                 ))}
               </select>
+
+              {/* Export CSV */}
+              <button
+                onClick={() => {
+                  const label = monthFilter !== "all" ? monthFilter : new Date().toISOString().slice(0, 7);
+                  exportCSV(filtered, label);
+                }}
+                title="Export filtered invoices as CSV"
+                className="flex items-center gap-1.5 px-3 py-2 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition"
+              >
+                <Download size={13} /> Export
+              </button>
 
               {/* Status toggle */}
               <div className="flex rounded-none border border-gray-200 overflow-hidden text-xs font-bold uppercase tracking-wider">

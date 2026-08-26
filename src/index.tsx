@@ -7,9 +7,10 @@ import { ProgressiveImage } from "./components/ProgressiveImage";
 export default Index;
 
 const portfolioItems = [
-  { img: images.home.carousel.slide1, label: "Product Launch", client: "Ayoosh Global Launch" },
-  { img: images.home.carousel.slide2, label: "Lifestyle Events",  client: "D'Ussé × Ashmed Hour" },
-  { img: images.home.carousel.slide3, label: "Product Launch", client: "Patrón EL Alto"       },
+  { img: images.home.carousel.slide1,              label: "Product Launch",          client: "Ayoosh Global Launch" },
+  { img: images.home.carousel.slide2,              label: "Lifestyle Events",        client: "D'Ussé × Ashmed Hour" },
+  { img: images.home.carousel.slide3,              label: "Brand Activation",        client: "Patrón EL Alto" },
+  { img: images.collaborations.gwmRegistration,    label: "Women's Lifestyle Event", client: "GWM — Women Who Move Us" },
 ];
 
 const brandsRow1 = [

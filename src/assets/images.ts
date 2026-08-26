@@ -46,5 +46,8 @@ export const images = {
     homieBombay:          "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Homie%20Lover%20Friend%20x%20Bombay%20Saphire.webp",
     maxhosaKultureFestival:"https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Maxhosa%20Kulture%20Festival.webp",
     dusse2:                "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/Dusse%20Instore%20Activation.webp",
+    gwmWomenWhoMoveUs:     "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/GMW.webp",
+    gwmRegistration:       "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/GMW%20Registration.webp",
+    ldvLaunch:             "https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/LDV.webp",
   },
 } as const;

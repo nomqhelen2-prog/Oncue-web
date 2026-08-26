@@ -22,6 +22,8 @@ const brandLogos: { name: string; logo: string; url: string | null; category: Ca
   { name: "Homie Lover Friend x Bombay", logo: `${B}Homie_Lover_Friend_x_Bombay_Saphire_logo-removebg-preview.png`,       url: "https://www.bombaysapphire.com",     category: "Events & Entertainment" },
   { name: "Shaka Ilembe",                logo: `${B}shaka-removebg-preview.png`,                                          url: "https://www.shakailembe.co.za",      category: "Events & Entertainment" },
   { name: "Luxe Awards",                 logo: `${B}luxe-removebg-preview.png`,                                           url: null,                                 category: "Events & Entertainment" },
+  { name: "GWM",                         logo: "/images/gwm-logo-clean.webp",                                               url: "https://www.gwm.co.za",              category: "Luxury & Lifestyle" },
+  { name: "LDV",                         logo: "/images/ldv-logo-clean.webp",                                               url: "https://www.ldv.co.za",              category: "Luxury & Lifestyle" },
 ];
 
 const CATEGORIES: Category[] = ["All", "Spirits & Beverages", "Luxury & Lifestyle", "Events & Entertainment", "Finance"];
@@ -79,7 +81,7 @@ const collabs = [
   { name: "Rolex",                   tag: "Luxury Brand Launches",       img: images.collaborations.rolex,                type: "portrait" },
   { name: "Nespresso",               tag: "Corporate Year Ends",   img: images.collaborations.nespresso,            type: "portrait" },
   { name: "D'Ussé x Ashmed Hour",    tag: "Experiential Lifestyle Events",    img: images.collaborations.dusseAshmedHour,      type: "portrait" },
-  
+
  { name: "D'Ussé",                  tag: "Brand Activation", img: images.collaborations.dusse },
  { name: "FNB",                     tag: "Corporate Gatherings",           img: images.collaborations.fnb },
   { name: "Patrón", tag: "Intimate Brand Events", img: images.collaborations.patronPrivate, type: "portrait" },
@@ -91,7 +93,9 @@ const collabs = [
   { name: "Shaka Ilembe",            tag: "Film Premier",        img: images.collaborations.shakaIlembePremier,  type: "portrait" },
   { name: "Ayoosh Global",           tag: "Product Launch",      img: images.collaborations.ayooshGlobalLaunch,  type: "medium" },
   { name: "Maxhosa Kulture Festival", tag: "Festival",  img: images.collaborations.maxhosaKultureFestival, type: "portrait" },
-  { name: "D'Ussé",         tag: "In-Store Activation",    img: images.collaborations.dusse2, type: "portrait" },
+  { name: "D'Ussé",                  tag: "In-Store Activation",          img: images.collaborations.dusse2,            type: "portrait" },
+  { name: "GWM — Women Who Move Us", tag: "Women's Lifestyle Event",      img: images.collaborations.gwmWomenWhoMoveUs, type: "portrait" },
+  { name: "LDV",                     tag: "Vehicle Launch Event",         img: images.collaborations.ldvLaunch,         type: "portrait" },
 ];
 
 function CollabPage() {

@@ -53,6 +53,30 @@ export default async function handler(req: any, res: any) {
   const { error } = await supabase.from("invoices").insert([record]);
 
   if (error) return res.status(500).json({ error: error.message });
+
+  // Fire WhatsApp alert if enabled — non-blocking, failure doesn't affect submission
+  try {
+    const { data: settings } = await supabase
+      .from("admin_settings").select("whatsapp_enabled").eq("id", 1).single();
+
+    if (settings?.whatsapp_enabled && process.env.CALLMEBOT_PHONE && process.env.CALLMEBOT_API_KEY) {
+      const name   = `${fields["First Name"] ?? ""} ${fields["Last Name"] ?? ""}`.trim();
+      const amount = fields["Total Owed (ZAR)"] ?? "—";
+      const group  = fields["WhatsApp Group"] ?? "—";
+      const jobDate = fields["Job Date"] ?? fields["Submission Date"] ?? "—";
+
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000";
+
+      fetch(`${baseUrl}/api/notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, amount, jobDate, group }),
+      }).catch(() => { /* silent fail */ });
+    }
+  } catch { /* silent fail — never block the invoice submission */ }
+
   return res.status(200).json({ success: true });
 }
 
