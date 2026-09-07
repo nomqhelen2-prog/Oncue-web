@@ -31,6 +31,7 @@ export type Invoice = {
   day_5_hours: number | null; day_5_rate: number | null;
   day_6_hours: number | null; day_6_rate: number | null;
   day_7_hours: number | null; day_7_rate: number | null;
+  job_date: string | null;
   stores_worked: string;
   labour_total: number | null;
   bought_items: string;
