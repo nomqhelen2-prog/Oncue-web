@@ -10,6 +10,7 @@ export default function AdminSettings() {
   const [saving, setSaving]         = useState(false);
   const [testing, setTesting]       = useState(false);
   const [testResult, setTestResult] = useState<"ok" | "err" | null>(null);
+  const [testError, setTestError]   = useState("");
   const [toast, setToast]           = useState("");
 
   // Auth guard
@@ -40,14 +41,22 @@ export default function AdminSettings() {
   async function sendTest() {
     setTesting(true);
     setTestResult(null);
+    setTestError("");
     try {
-      const res = await fetch("/api/notify", {
+      const res  = await fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ test: true }),
       });
-      setTestResult(res.ok ? "ok" : "err");
+      if (res.ok) {
+        setTestResult("ok");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setTestError(data.error ?? "Unknown error");
+        setTestResult("err");
+      }
     } catch {
+      setTestError("Could not reach the server.");
       setTestResult("err");
     }
     setTesting(false);
@@ -121,8 +130,9 @@ export default function AdminSettings() {
               </span>
             )}
             {testResult === "err" && (
-              <span className="flex items-center gap-1 text-red-500 text-xs font-bold">
-                <AlertCircle size={13} /> Failed — check Vercel env vars
+              <span className="flex items-center gap-1.5 text-red-500 text-xs font-bold">
+                <AlertCircle size={13} />
+                {testError || "Sorry, couldn't contact the email service at this moment."}
               </span>
             )}
           </div>

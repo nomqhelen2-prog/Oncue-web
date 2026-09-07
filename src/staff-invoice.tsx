@@ -251,7 +251,7 @@ export default function StaffInvoicePage() {
       "Fixed Rate (ZAR)": data.fixedRate || "",
       "Setup Rate (ZAR)": data.setupRate || "",
       ...dayBreakdown,
-      "Stores Worked": data.storeList,
+      "Event/Activation Venue": data.storeList,
       "Labour Total (ZAR)": data.labourTotal,
       "Bought Items": data.boughtAnything,
       "Purchase Details": data.purchaseDetails || "",
@@ -478,7 +478,7 @@ export default function StaffInvoicePage() {
 
             {/* Stores worked — shown once job type is selected */}
             {data.jobType && (
-              <Field label="Stores / Venues Worked" hint="Brand name and venue — e.g. 'Patrón Sandton City'. Add (return) if you revisited a venue.">
+              <Field label="Event / Activation Venue" hint="Brand name and venue — e.g. 'Patrón Sandton City'. Add (return) if you revisited a venue.">
                 <textarea
                   className={`${inputCls} resize-none`} rows={4}
                   value={data.storeList} onChange={e => upd({ storeList: e.target.value })}

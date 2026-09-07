@@ -23,17 +23,70 @@ function currentWeek() {
 }
 
 // ── Detail drawer ─────────────────────────────────────────────────────────────
-function DetailDrawer({ inv, onClose, onTogglePaid, onDelete }: {
-  inv: Invoice; onClose: () => void; onTogglePaid: (id: string, paid: boolean) => void; onDelete: (id: string) => void;
+function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
+  inv: Invoice; onClose: () => void; onTogglePaid: (id: string, paid: boolean) => void;
+  onDelete: (id: string) => void; onUpdate: (id: string, patch: Partial<Invoice>) => void;
 }) {
-  const [notes, setNotes] = useState(inv.admin_notes || "");
+  const [notes, setNotes]       = useState(inv.admin_notes || "");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [editing, setEditing]   = useState(false);
+  const [saving, setSaving]     = useState(false);
+  const [edit, setEdit]         = useState({
+    whatsapp:        inv.whatsapp        ?? "",
+    bank_name:       inv.bank_name       ?? "",
+    account_holder:  inv.account_holder  ?? "",
+    account_number:  inv.account_number  ?? "",
+    branch_code:     inv.branch_code     ?? "",
+    account_type:    inv.account_type    ?? "",
+    whatsapp_group:  inv.whatsapp_group  ?? "",
+    job_type:        inv.job_type        ?? "",
+    days_worked:     inv.days_worked     ?? "",
+    daily_rate:      inv.daily_rate      != null ? String(inv.daily_rate)      : "",
+    fixed_rate:      inv.fixed_rate      != null ? String(inv.fixed_rate)      : "",
+    setup_rate:      inv.setup_rate      != null ? String(inv.setup_rate)      : "",
+    stores_worked:   inv.stores_worked   ?? "",
+    purchase_amount: inv.purchase_amount != null ? String(inv.purchase_amount) : "",
+    fuel_amount:     inv.fuel_amount     != null ? String(inv.fuel_amount)     : "",
+    pre_pay_amount:  inv.pre_pay_amount  != null ? String(inv.pre_pay_amount)  : "",
+    total_owed:      inv.total_owed      != null ? String(inv.total_owed)      : "",
+  });
+
+  function upd(k: keyof typeof edit, v: string) { setEdit(e => ({ ...e, [k]: v })); }
 
   async function saveNotes() {
     setSavingNotes(true);
     await supabase.from("invoices").update({ admin_notes: notes }).eq("id", inv.id);
     setSavingNotes(false);
   }
+
+  async function saveEdits() {
+    setSaving(true);
+    const patch: Partial<Invoice> = {
+      whatsapp:        edit.whatsapp       || null,
+      bank_name:       edit.bank_name      || null,
+      account_holder:  edit.account_holder || null,
+      account_number:  edit.account_number || null,
+      branch_code:     edit.branch_code    || null,
+      account_type:    edit.account_type   || null,
+      whatsapp_group:  edit.whatsapp_group || null,
+      job_type:        edit.job_type       || null,
+      days_worked:     edit.days_worked    || null,
+      daily_rate:      edit.daily_rate     ? parseFloat(edit.daily_rate)      : null,
+      fixed_rate:      edit.fixed_rate     ? parseFloat(edit.fixed_rate)      : null,
+      setup_rate:      edit.setup_rate     ? parseFloat(edit.setup_rate)      : null,
+      stores_worked:   edit.stores_worked  || null,
+      purchase_amount: edit.purchase_amount ? parseFloat(edit.purchase_amount) : null,
+      fuel_amount:     edit.fuel_amount    ? parseFloat(edit.fuel_amount)     : null,
+      pre_pay_amount:  edit.pre_pay_amount ? parseFloat(edit.pre_pay_amount)  : null,
+      total_owed:      edit.total_owed     ? parseFloat(edit.total_owed)      : null,
+    } as any;
+    await supabase.from("invoices").update(patch).eq("id", inv.id);
+    onUpdate(inv.id, patch);
+    setSaving(false);
+    setEditing(false);
+  }
+
+  const inCls = "w-full bg-white/5 border-b border-white/20 px-1 py-1.5 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] transition";
 
   const rows = ([
     ["Email", inv.email],
@@ -97,26 +150,77 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete }: {
           {inv.paid ? "✓ Paid — Mark as Unpaid" : "Mark as Paid"}
         </button>
 
-        <button
-          onClick={() => { onClose(); onDelete(inv.id); }}
-          className="w-full py-2.5 font-bold uppercase tracking-widest text-xs transition rounded-sm border border-red-900/40 text-red-400 hover:bg-red-950/40 flex items-center justify-center gap-2"
-        >
-          <Trash2 size={13} /> Delete Submission
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditing(e => !e)}
+            className="flex-1 py-2.5 font-bold uppercase tracking-widest text-xs transition rounded-sm border border-white/20 text-white/70 hover:border-white/50 hover:text-white"
+          >
+            {editing ? "Cancel Edit" : "✏ Edit Invoice"}
+          </button>
+          <button
+            onClick={() => { onClose(); onDelete(inv.id); }}
+            className="flex-1 py-2.5 font-bold uppercase tracking-widest text-xs transition rounded-sm border border-red-900/40 text-red-400 hover:bg-red-950/40 flex items-center justify-center gap-2"
+          >
+            <Trash2 size={13} /> Delete
+          </button>
+        </div>
 
-        <div className="divide-y divide-white/5">
-          {[...rows, ...dayRows].map(([k, v], idx) => v ? (
-            <div key={k} className={`flex justify-between gap-4 py-2.5 ${idx % 2 === 0 ? "" : "bg-white/[0.02] -mx-2 px-2"}`}>
-              <span className="text-[11px] uppercase tracking-widest text-white/50 flex-shrink-0">{k}</span>
-              <span className="text-sm text-white text-right font-medium">{v}</span>
+        {/* ── Edit form ── */}
+        {editing ? (
+          <div className="flex flex-col gap-4">
+            {([
+              ["WhatsApp",        "whatsapp"],
+              ["Bank",            "bank_name"],
+              ["Account Holder",  "account_holder"],
+              ["Account Number",  "account_number"],
+              ["Branch Code",     "branch_code"],
+              ["Account Type",    "account_type"],
+              ["WhatsApp Group",  "whatsapp_group"],
+              ["Job Type",        "job_type"],
+              ["Days Worked",     "days_worked"],
+              ["Daily Rate (R)",  "daily_rate"],
+              ["Fixed Rate (R)",  "fixed_rate"],
+              ["Setup Rate (R)",  "setup_rate"],
+              ["Venue",           "stores_worked"],
+              ["Purchase Amt (R)","purchase_amount"],
+              ["Fuel Amt (R)",    "fuel_amount"],
+              ["Pre-Pay Amt (R)", "pre_pay_amount"],
+              ["Total Owed (R)",  "total_owed"],
+            ] as [string, keyof typeof edit][]).map(([label, key]) => (
+              <div key={key}>
+                <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">{label}</label>
+                <input
+                  className={inCls}
+                  value={edit[key]}
+                  onChange={e => upd(key, e.target.value)}
+                />
+              </div>
+            ))}
+            <button
+              onClick={saveEdits}
+              disabled={saving}
+              className="w-full py-3 bg-[var(--color-gold)] text-black font-black uppercase tracking-widest text-sm hover:brightness-110 transition disabled:opacity-50 mt-2"
+            >
+              {saving ? "Saving…" : "Save Changes"}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="divide-y divide-white/5">
+              {[...rows, ...dayRows].map(([k, v], idx) => v ? (
+                <div key={k} className={`flex justify-between gap-4 py-2.5 ${idx % 2 === 0 ? "" : "bg-white/[0.02] -mx-2 px-2"}`}>
+                  <span className="text-[11px] uppercase tracking-widest text-white/50 flex-shrink-0">{k}</span>
+                  <span className="text-sm text-white text-right font-medium">{v}</span>
+                </div>
+              ) : null)}
             </div>
-          ) : null)}
-        </div>
 
-        <div className="border border-[var(--color-gold)]/40 rounded-sm px-4 py-3 flex justify-between items-center">
-          <span className="text-[11px] uppercase tracking-widest text-[var(--color-gold)] font-bold">Total Owed</span>
-          <span className="font-black text-white text-lg">{fmt(inv.total_owed)}</span>
-        </div>
+            <div className="border border-[var(--color-gold)]/40 rounded-sm px-4 py-3 flex justify-between items-center">
+              <span className="text-[11px] uppercase tracking-widest text-[var(--color-gold)] font-bold">Total Owed</span>
+              <span className="font-black text-white text-lg">{fmt(inv.total_owed)}</span>
+            </div>
+          </>
+        )}
 
         <div>
           <label className="block text-[11px] uppercase tracking-[0.2em] text-white/60 mb-2 font-bold">Admin Notes</label>
@@ -624,6 +728,10 @@ export default function AdminDashboard() {
             setSelected(prev => prev ? { ...prev, paid } : null);
           }}
           onDelete={deleteInvoice}
+          onUpdate={(id, patch) => {
+            setInvoices(prev => prev.map(i => i.id === id ? { ...i, ...patch } : i));
+            setSelected(prev => prev ? { ...prev, ...patch } : null);
+          }}
         />
       )}
     </div>
