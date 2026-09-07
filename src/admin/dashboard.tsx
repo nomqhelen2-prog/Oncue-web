@@ -102,7 +102,7 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
     inv.daily_rate   ? ["Daily Rate", fmt(inv.daily_rate)]   : ["", ""],
     inv.fixed_rate   ? ["Fixed Rate", fmt(inv.fixed_rate)]   : ["", ""],
     inv.setup_rate   ? ["Setup Rate", fmt(inv.setup_rate)]   : ["", ""],
-    ["Stores Worked", inv.stores_worked],
+    ["Venues Worked", inv.stores_worked],
     ["Labour Total", fmt(inv.labour_total)],
     ["Bought Items", inv.bought_items],
     inv.bought_items === "yes" ? ["Purchase Details", inv.purchase_details] : ["", ""],
