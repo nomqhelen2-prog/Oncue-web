@@ -57,7 +57,7 @@ interface FormData {
   jobDate: string;
   jobType: "" | "daily" | "hourly" | "fixed" | "setup";
   dailyRate: string; daysWorked: string; daysOtherValue: string;
-  dayHours: string[]; dayRates: string[];
+  dayHours: string[]; dayRates: string[]; dayDates: string[];
   fixedRate: string; setupRate: string;
   storeList: string; labourTotal: string;
   boughtAnything: "" | "yes" | "no";
@@ -75,7 +75,7 @@ const EMPTY: FormData = {
   branchCode: "", accountType: "",
   whatsappGroup: "", jobDate: "", jobType: "",
   dailyRate: "", daysWorked: "", daysOtherValue: "",
-  dayHours: [], dayRates: [],
+  dayHours: [], dayRates: [], dayDates: [],
   fixedRate: "", setupRate: "",
   storeList: "", labourTotal: "",
   boughtAnything: "", purchaseDetails: "", purchaseAmount: "",
@@ -196,7 +196,7 @@ export default function StaffInvoicePage() {
   function upd(partial: Partial<FormData>) {
     setData(prev => ({ ...prev, ...partial }));
   }
-  function updDay(field: "dayHours" | "dayRates", idx: number, val: string) {
+  function updDay(field: "dayHours" | "dayRates" | "dayDates", idx: number, val: string) {
     setData(prev => {
       const arr = [...prev[field]];
       arr[idx] = val;
@@ -234,8 +234,9 @@ export default function StaffInvoicePage() {
     setSubmitStatus("loading");
     const dayBreakdown: Record<string, string> = {};
     for (let i = 0; i < dayCount; i++) {
-      dayBreakdown[`Day ${i + 1} Hours`] = data.dayHours[i] || "";
+      dayBreakdown[`Day ${i + 1} Hours`]    = data.dayHours[i]  || "";
       dayBreakdown[`Day ${i + 1} Rate (ZAR)`] = data.dayRates[i] || "";
+      dayBreakdown[`Day ${i + 1} Date`]     = data.dayDates[i]  || "";
     }
     const fields: Record<string, unknown> = {
       "First Name": data.firstName, "Last Name": data.lastName,
@@ -412,7 +413,7 @@ export default function StaffInvoicePage() {
                 }
                 onChange={v => upd({
                   jobType: v === "Daily Rate" ? "daily" : v === "Hourly" ? "hourly" : v === "Fixed Rate" ? "fixed" : "setup",
-                  daysWorked: "", daysOtherValue: "", dayHours: [], dayRates: [],
+                  daysWorked: "", daysOtherValue: "", dayHours: [], dayRates: [], dayDates: [],
                 })}
                 cols={2}
               />
@@ -439,7 +440,7 @@ export default function StaffInvoicePage() {
             {data.jobType === "hourly" && (
               <>
                 <Field label="Total Days Worked">
-                  <RadioGrid options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]} value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "", dayHours: [], dayRates: [] })} cols={4} />
+                  <RadioGrid options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]} value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "", dayHours: [], dayRates: [], dayDates: [] })} cols={4} />
                   {data.daysWorked === "Other" && (
                     <div className="mt-3">
                       <input className={inputCls} type="number" min="1" value={data.daysOtherValue} onChange={e => upd({ daysOtherValue: e.target.value })} placeholder="Enter number of days" />
@@ -449,6 +450,11 @@ export default function StaffInvoicePage() {
                 {Array.from({ length: dayCount }, (_, i) => (
                   <div key={i} className="border border-white/15 bg-black/20 p-6 mb-6">
                     <p className="text-[var(--color-gold)] text-xs uppercase tracking-widest font-bold mb-6">Day {i + 1}</p>
+                    <div className="mb-6">
+                      <Field label="Date" hint="e.g. 13/09/2026">
+                        <input className={inputCls} type="text" value={data.dayDates[i] ?? ""} onChange={e => updDay("dayDates", i, e.target.value)} placeholder="e.g. 13/09/2026" />
+                      </Field>
+                    </div>
                     <div className="grid grid-cols-2 gap-8">
                       <Field label="Hours Worked" hint="Use a full stop for part hours — e.g. 4.5">
                         <input className={inputCls} type="number" min="0" step="0.5" value={data.dayHours[i] ?? ""} onChange={e => updDay("dayHours", i, e.target.value)} placeholder="e.g. 8" />

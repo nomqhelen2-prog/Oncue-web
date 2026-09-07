@@ -116,14 +116,14 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
     ["Agreed to T&Cs", inv.agreed_to_terms ? "Yes" : "No"],
   ] as [string, string][]).filter(([k]) => k);
 
-  const jobDates = (inv.job_date ?? "").split(",").map((d: string) => d.trim()).filter(Boolean);
   const dayRows: [string, string][] = [];
   for (let i = 1; i <= 7; i++) {
     const h = inv[`day_${i}_hours` as keyof Invoice] as number | null;
     const r = inv[`day_${i}_rate` as keyof Invoice] as number | null;
+    const d = inv[`day_${i}_date` as keyof Invoice] as string | null;
     if (h != null) {
-      const date = jobDates[i - 1] ? ` (${jobDates[i - 1]})` : "";
-      dayRows.push([`Day ${i}${date}`, `${h} hrs @ ${fmt(r)}/hr`]);
+      const dateLabel = d ? ` (${d})` : "";
+      dayRows.push([`Day ${i}${dateLabel}`, `${h} hrs @ ${fmt(r)}/hr`]);
     }
   }
 
