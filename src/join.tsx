@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { z } from "zod";
-import { Loader2, Upload, X, ImagePlus } from "lucide-react";
+import { Loader2, X, Plus } from "lucide-react";
 import { supabase } from "./lib/supabase";
 
 export default JoinPage;
@@ -58,8 +58,8 @@ async function uploadImages(files: File[]): Promise<string[]> {
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 const inputCls =
-  "w-full bg-transparent border-b border-white/20 py-3 focus:outline-none focus:border-[var(--color-gold)] text-white placeholder:text-white/30 text-sm";
-const labelCls = "block text-[11px] uppercase tracking-widest text-white/70 mb-2 font-semibold";
+  "w-full bg-transparent border-b border-white/30 py-3 focus:outline-none focus:border-[var(--color-gold)] text-white placeholder:text-white/40 text-base";
+const labelCls = "block text-xs uppercase tracking-widest text-white mb-2 font-bold";
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 function JoinPage() {
@@ -74,7 +74,12 @@ function JoinPage() {
   const [status, setStatus]     = useState<"idle" | "uploading" | "submitting" | "success" | "error">("idle");
   const [error, setError]       = useState<string | null>(null);
   const [progress, setProgress] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
+  const fileRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
 
   const f = (k: keyof typeof form) => ({
     value: form[k],
@@ -82,18 +87,26 @@ function JoinPage() {
       setForm(prev => ({ ...prev, [k]: e.target.value })),
   });
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(e.target.files ?? []).slice(0, 4);
-    setImages(selected);
-    setPreviews(selected.map(f => URL.createObjectURL(f)));
+  function onSlotFileChange(slotIdx: number, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImages(prev => { const next = [...prev]; next[slotIdx] = file; return next; });
+    setPreviews(prev => {
+      const next = [...prev];
+      if (next[slotIdx]) URL.revokeObjectURL(next[slotIdx]);
+      next[slotIdx] = URL.createObjectURL(file);
+      return next;
+    });
     e.target.value = "";
   }
 
   function removeImage(idx: number) {
-    setImages(prev => prev.filter((_, i) => i !== idx));
+    setImages(prev => { const next = [...prev]; next[idx] = undefined as any; return next.filter(Boolean); });
     setPreviews(prev => {
-      URL.revokeObjectURL(prev[idx]);
-      return prev.filter((_, i) => i !== idx);
+      const next = [...prev];
+      if (next[idx]) URL.revokeObjectURL(next[idx]);
+      next[idx] = "";
+      return next;
     });
   }
 
@@ -103,14 +116,14 @@ function JoinPage() {
 
     const parsed = schema.safeParse(form);
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
-    if (images.length < 4) { setError("Please upload all 4 photos before submitting."); return; }
+    if (images.filter(Boolean).length < 4) { setError("Please add all 4 photos before submitting."); return; }
 
     setStatus("uploading");
     setProgress("Compressing and uploading photos…");
 
     let imageUrls: string[];
     try {
-      imageUrls = await uploadImages(images);
+      imageUrls = await uploadImages(images.filter(Boolean));
     } catch (err: any) {
       setStatus("error");
       setError("Photo upload failed — please check your connection and try again.");
@@ -147,15 +160,14 @@ function JoinPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        {/* Background image */}
+        {/* Background image — object-top keeps heads in frame */}
         <img
           src="https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/DUSSE%20X%20NOSTRA-55.jpeg"
           alt=""
           loading="eager"
           decoding="async"
-          fetchPriority="high"
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-top"
         />
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/65" />
@@ -250,52 +262,59 @@ function JoinPage() {
             {/* Photos */}
             <div>
               <h2 className="text-xs uppercase tracking-[0.3em] text-[var(--color-gold)] font-bold mb-2">Photos</h2>
-              <p className="text-white/40 text-xs mb-6">
-                Upload exactly 4 photos — a clear face shot, a full-body shot, and two others showing your style.
-                Photos are compressed automatically to save space.
+              <p className="text-white/60 text-sm mb-6">
+                Upload 4 photos — a clear face shot, a full-body shot, and two others showing your style. Click each box to add a photo.
               </p>
 
-              <div className="grid grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[0, 1, 2, 3].map(i => (
-                  <div key={i} className="aspect-square border border-white/15 relative overflow-hidden">
-                    {previews[i] ? (
-                      <>
-                        <img src={previews[i]} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(i)}
-                          className="absolute top-1 right-1 bg-black/70 rounded-full p-0.5 text-white hover:bg-red-600 transition"
-                        >
-                          <X size={12} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-white/20 gap-1">
-                        <ImagePlus size={18} />
-                        <span className="text-[10px] uppercase tracking-wider">Photo {i + 1}</span>
-                      </div>
-                    )}
+                  <div key={i}>
+                    {/* Hidden file input per slot */}
+                    <input
+                      ref={fileRefs[i]}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => onSlotFileChange(i, e)}
+                    />
+                    <div
+                      onClick={() => !busy && fileRefs[i].current?.click()}
+                      className={`aspect-square border-2 border-dashed relative overflow-hidden cursor-pointer transition group ${
+                        previews[i]
+                          ? "border-[var(--color-gold)]"
+                          : "border-white/30 hover:border-white/70"
+                      }`}
+                    >
+                      {previews[i] ? (
+                        <>
+                          <img src={previews[i]} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                          {/* X button */}
+                          <button
+                            type="button"
+                            onClick={e => { e.stopPropagation(); removeImage(i); }}
+                            className="absolute top-2 right-2 bg-black/80 rounded-full p-1 text-white hover:bg-red-600 transition z-10"
+                          >
+                            <X size={12} />
+                          </button>
+                          {/* Hover re-select overlay */}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span className="text-white text-xs font-bold uppercase tracking-widest">Change</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-white/50 group-hover:text-white transition p-4">
+                          <Plus size={24} />
+                          <span className="text-xs font-bold uppercase tracking-widest text-center">Add Image {i + 1}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={onFileChange}
-              />
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={busy}
-                className="flex items-center gap-2 border border-white/20 px-5 py-3 text-xs uppercase tracking-widest text-white/70 hover:border-white/50 hover:text-white transition disabled:opacity-40"
-              >
-                <Upload size={13} />
-                {images.length === 0 ? "Select Photos" : `${images.length} selected — change`}
-              </button>
+              <p className="text-white/40 text-xs mt-3">
+                {images.filter(Boolean).length}/4 photos added
+              </p>
             </div>
 
             {error && <p className="text-red-400 text-sm">{error}</p>}

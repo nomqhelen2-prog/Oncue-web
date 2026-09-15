@@ -240,7 +240,7 @@ function Index() {
 
       {/* ── Contact Section ── */}
       <section id="home-contact" className="panel max-w-6xl mx-auto py-24 px-6">
-        <div className="bg-[#1a1a1a] p-8 md:p-12 text-center">
+        <div className="bg-white/8 border border-white/10 p-8 md:p-12 text-center" style={{ background: "linear-gradient(135deg, #2a2a2a 0%, #333 100%)" }}>
           <h2 className="text-3xl md:text-5xl font-black mb-4 uppercase text-white">
             Connect with us
           </h2>

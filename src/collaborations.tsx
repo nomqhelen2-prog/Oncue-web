@@ -91,7 +91,7 @@ const collabs = [
   { name: "Homie Lover Friend x Bombay",       tag: "Lifestyle Events",  img: images.collaborations.homieBombay,         type: "portrait" },
   { name: "Comfort", tag: " Influencer Party",      img: images.collaborations.comfortFabricSoftener, type: "portrait" },
   { name: "Shaka Ilembe",            tag: "Film Premier",        img: images.collaborations.shakaIlembePremier,  type: "portrait" },
-  { name: "Ayoosh Global",           tag: "Product Launch",      img: images.collaborations.ayooshGlobalLaunch,  type: "medium" },
+  { name: "Ayoosh Global",           tag: "Product Launch",      img: images.collaborations.ayooshGlobalLaunch,  type: "portrait" },
   { name: "Maxhosa Kulture Festival", tag: "Festival",  img: images.collaborations.maxhosaKultureFestival, type: "portrait" },
   { name: "D'Ussé",                  tag: "In-Store Activation",          img: images.collaborations.dusse2,            type: "portrait" },
   { name: "GWM — Women Who Move Us", tag: "Women's Lifestyle Event",      img: images.collaborations.gwmWomenWhoMoveUs, type: "portrait" },
@@ -158,10 +158,12 @@ function CollabPage() {
           )}
         </div>
 
-        {/* Logo grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+        {/* Logo grid — flex wrap so last row centres regardless of count */}
+        <div className="flex flex-wrap justify-center gap-5">
           {filtered.map((b) => (
-            <LogoCard key={b.name} name={b.name} logo={b.logo} url={b.url} />
+            <div key={b.name} className="w-[calc(50%-10px)] sm:w-[calc(33.333%-14px)] md:w-[calc(25%-15px)]">
+              <LogoCard name={b.name} logo={b.logo} url={b.url} />
+            </div>
           ))}
         </div>
 
