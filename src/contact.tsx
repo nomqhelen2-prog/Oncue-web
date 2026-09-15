@@ -173,14 +173,28 @@ function ContactPage() {
       </section>
 
       {/* ── Join the Team CTA ── */}
-      <section className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
+      <section className="relative overflow-hidden">
+        {/* Background image — lazy loaded, absolutely positioned */}
+        <img
+          src="https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/DUSSE%20X%20NOSTRA-55.jpeg"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* Dark overlay + fade to black at bottom */}
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, #000 100%)" }} />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <p className="text-xs uppercase tracking-widest text-[var(--color-gold)] mb-4">Promoters</p>
             <h2 className="text-4xl sm:text-5xl font-black uppercase leading-[0.9] mb-6">
               Want to Join<br />the Team?
             </h2>
-            <p className="text-white/50 text-base leading-relaxed max-w-md">
+            <p className="text-white/70 text-base leading-relaxed max-w-md">
               We're always looking for talented promoters and brand ambassadors across JHB, CPT, and DBN. Apply on our dedicated page — we'll review your application and be in touch.
             </p>
           </div>

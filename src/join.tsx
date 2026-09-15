@@ -146,16 +146,34 @@ function JoinPage() {
     <div className="bg-black text-white min-h-screen">
 
       {/* Hero */}
-      <section className="border-b border-white/10 px-6 py-20 max-w-7xl mx-auto">
-        <p className="text-xs uppercase tracking-widest text-[var(--color-gold)] mb-4">Promoters</p>
-        <h1 className="text-5xl sm:text-7xl font-black uppercase leading-[0.9] mb-6">
-          Join the<br />
-          <span className="text-[var(--color-gold)]">Team</span>
-        </h1>
-        <p className="text-white/50 max-w-xl text-base leading-relaxed">
-          OnCue Marketing works with brand ambassadors and promoters across Johannesburg, Cape Town, and Durban.
-          Fill in the form below and we'll be in touch if you're a good fit.
-        </p>
+      <section className="relative overflow-hidden">
+        {/* Background image */}
+        <img
+          src="https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/DUSSE%20X%20NOSTRA-55.jpeg"
+          alt=""
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/65" />
+        {/* Fade to black at the bottom so form section blends in */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, #000 100%)" }} />
+
+        {/* Content */}
+        <div className="relative z-10 px-6 py-28 max-w-7xl mx-auto">
+          <p className="text-xs uppercase tracking-widest text-[var(--color-gold)] mb-4">Promoters</p>
+          <h1 className="text-5xl sm:text-7xl font-black uppercase leading-[0.9] mb-6">
+            Join the<br />
+            <span className="text-[var(--color-gold)]">Team</span>
+          </h1>
+          <p className="text-white/70 max-w-xl text-base leading-relaxed">
+            OnCue Marketing works with brand ambassadors and promoters across Johannesburg, Cape Town, and Durban.
+            Fill in the form below and we'll be in touch if you're a good fit.
+          </p>
+        </div>
       </section>
 
       {/* Form */}
