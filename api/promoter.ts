@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
 /** Upload a base64 data-URL to Supabase Storage using the service key. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function uploadBase64(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   dataUrl: string,
   index: number
 ): Promise<string> {
