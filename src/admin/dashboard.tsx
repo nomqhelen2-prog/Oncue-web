@@ -262,18 +262,32 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
     setSaving(false);
   }
 
-  // Build contact action links
+  // WhatsApp link — opens WhatsApp WEB (browser) so it uses the OnCue Marketing
+  // account logged in there, not the personal phone app.
   const waNumber = (promo.phone ?? "").replace(/\D/g, "");
   const waText   = encodeURIComponent(
     `Hi ${promo.name ?? "there"}! 🎉 Your OnCue Marketing promoter application has been approved. We'd love to have you on the team — please reply so we can discuss next steps.`
   );
-  const waHref   = `https://wa.me/${waNumber}?text=${waText}`;
+  const waHref = `https://web.whatsapp.com/send?phone=${waNumber}&text=${waText}`;
 
-  const emailSubject = encodeURIComponent("Your OnCue Marketing Application — Approved!");
-  const emailBody    = encodeURIComponent(
-    `Hi ${promo.name ?? "there"},\n\nCongratulations! We're pleased to let you know that your application to join the OnCue Marketing promoter team has been approved.\n\nWe'll be in touch with more details about upcoming activations.\n\nWarm regards,\nOnCue Marketing Team`
-  );
-  const emailHref = `mailto:${promo.email ?? ""}?subject=${emailSubject}&body=${emailBody}`;
+  // Email — build the mailto string and open via window.open() for reliability
+  const emailSubject = "Your OnCue Marketing Application — Approved!";
+  const emailBody    =
+    `Hi ${promo.name ?? "there"},\n\nCongratulations! We are pleased to let you know that your application to join the OnCue Marketing promoter team has been approved.\n\nWe will be in touch with more details about upcoming activations.\n\nWarm regards,\nOnCue Marketing Team`;
+  const emailHref = `mailto:${promo.email ?? ""}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+
+  const [emailCopied, setEmailCopied] = useState(false);
+  function copyEmail() {
+    if (!promo.email) return;
+    navigator.clipboard.writeText(promo.email).then(() => {
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    });
+  }
+  function openEmail() {
+    // window.open forces the browser to try the mailto handler
+    window.open(emailHref, "_self");
+  }
 
   const details: [string, string][] = [
     ["Age",        promo.age        ?? "—"],
@@ -299,9 +313,9 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
 
         {/* Contact details — WhatsApp & Email clearly separated */}
         <div className="bg-white/5 border border-white/10 divide-y divide-white/5">
-          {promo.phone && (
+          {promo.phone ? (
             <a
-              href={`https://wa.me/${waNumber}`}
+              href={`https://web.whatsapp.com/send?phone=${waNumber}`}
               target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-between px-4 py-3 group hover:bg-white/5 transition"
             >
@@ -309,20 +323,40 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
                 <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">WhatsApp / Call</p>
                 <p className="text-sm text-white font-semibold">{promo.phone}</p>
               </div>
-              <span className="text-[10px] uppercase tracking-widest text-green-400 group-hover:text-green-300 font-bold">Open ↗</span>
+              <span className="text-[10px] uppercase tracking-widest text-green-400 group-hover:text-green-300 font-bold">Message ↗</span>
             </a>
+          ) : (
+            <div className="px-4 py-3">
+              <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">WhatsApp / Call</p>
+              <p className="text-sm text-white/30 italic">No number on file</p>
+            </div>
           )}
-          {promo.email && (
-            <a
-              href={`mailto:${promo.email}`}
-              className="flex items-center justify-between px-4 py-3 group hover:bg-white/5 transition"
-            >
-              <div>
+          {promo.email ? (
+            <div className="flex items-center justify-between px-4 py-3 gap-3">
+              <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">Email</p>
                 <p className="text-sm text-white font-semibold break-all">{promo.email}</p>
               </div>
-              <span className="text-[10px] uppercase tracking-widest text-[var(--color-gold)] group-hover:text-white font-bold">Open ↗</span>
-            </a>
+              <div className="flex gap-2 flex-shrink-0">
+                <button
+                  onClick={openEmail}
+                  className="text-[10px] uppercase tracking-widest text-[var(--color-gold)] hover:text-white font-bold transition whitespace-nowrap"
+                >
+                  Open ↗
+                </button>
+                <button
+                  onClick={copyEmail}
+                  className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white font-bold transition whitespace-nowrap"
+                >
+                  {emailCopied ? "Copied ✓" : "Copy"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 py-3">
+              <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">Email</p>
+              <p className="text-sm text-white/30 italic">No email on file</p>
+            </div>
           )}
         </div>
 
@@ -348,28 +382,55 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
         {/* Quick-contact buttons — only show when approved */}
         {promo.status === "approved" && (
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Notify applicant</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">
+              Send approval message to {promo.name}
+            </p>
             <div className="flex gap-2">
-              {promo.phone && (
-                <a
-                  href={waHref}
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#25D366] text-black font-black text-xs uppercase tracking-widest hover:brightness-110 transition"
-                >
-                  💬 WhatsApp
-                </a>
+              {promo.phone ? (
+                <div className="flex-1 flex flex-col gap-1">
+                  <p className="text-[9px] uppercase tracking-widest text-white/30 font-bold text-center">WhatsApp</p>
+                  <div className="flex gap-1">
+                    <a
+                      href={`https://wa.me/${waNumber}?text=${waText}`}
+                      target="_blank" rel="noopener noreferrer"
+                      title="Opens your phone's WhatsApp app"
+                      className="flex-1 flex flex-col items-center justify-center py-2.5 bg-[#25D366] text-black font-black text-[10px] uppercase tracking-widest hover:brightness-110 transition"
+                    >
+                      <span>📱 App</span>
+                      <span className="text-[8px] font-normal mt-0.5 opacity-60 normal-case">Phone</span>
+                    </a>
+                    <a
+                      href={waHref}
+                      target="_blank" rel="noopener noreferrer"
+                      title="Opens WhatsApp Web in the browser"
+                      className="flex-1 flex flex-col items-center justify-center py-2.5 bg-[#128C7E] text-white font-black text-[10px] uppercase tracking-widest hover:brightness-110 transition"
+                    >
+                      <span>💻 Web</span>
+                      <span className="text-[8px] font-normal mt-0.5 opacity-60 normal-case">Browser</span>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center py-3 bg-white/10 text-white/30 text-xs uppercase tracking-widest">
+                  No number
+                </div>
               )}
-              {promo.email && (
-                <a
-                  href={emailHref}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--color-gold)] text-black font-black text-xs uppercase tracking-widest hover:brightness-110 transition"
+              {promo.email ? (
+                <button
+                  onClick={openEmail}
+                  className="flex-1 flex flex-col items-center justify-center py-3 bg-[var(--color-gold)] text-black font-black text-xs uppercase tracking-widest hover:brightness-110 transition"
                 >
-                  ✉ Email
-                </a>
+                  <span>✉ Email</span>
+                  <span className="text-[9px] font-normal mt-0.5 opacity-70 normal-case tracking-normal max-w-full truncate px-1">{promo.email}</span>
+                </button>
+              ) : (
+                <div className="flex-1 flex items-center justify-center py-3 bg-white/10 text-white/30 text-xs uppercase tracking-widest">
+                  No email
+                </div>
               )}
             </div>
             <p className="text-[10px] text-white/30 leading-relaxed">
-              Opens WhatsApp / your email client with a pre-written message you can edit before sending.
+              Opens WhatsApp / your mail app with a pre-written message — you can edit before sending.
             </p>
           </div>
         )}

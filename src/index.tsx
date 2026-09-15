@@ -231,7 +231,7 @@ function Index() {
         <div className="mt-12 text-center">
           <Link
             to="/collaborations"
-            className="text-[var(--color-gold)] font-bold tracking-wider hover:underline inline-flex items-center gap-2 uppercase text-sm"
+            className="inline-flex items-center gap-3 bg-[var(--color-gold)] text-black px-10 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition"
           >
             View All Collaborations <ArrowRight className="w-4 h-4" />
           </Link>
