@@ -17,7 +17,8 @@ export type PromoterApplication = {
   top_size: string | null;
   pant_size: string | null;
   description: string | null;
-  phone: string | null;
+  phone: string | null;      // WhatsApp / call number
+  email: string | null;      // Email address
   image_1_url: string | null;
   image_2_url: string | null;
   image_3_url: string | null;

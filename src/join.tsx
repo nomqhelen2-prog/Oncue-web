@@ -14,7 +14,8 @@ const schema = z.object({
   top_size:    z.string().trim().min(1, "Top size is required").max(10),
   pant_size:   z.string().trim().min(1, "Pant size is required").max(10),
   description: z.string().trim().min(20, "Tell us more about yourself (min 20 characters)").max(1500),
-  phone:       z.string().trim().min(7, "Phone number is required").max(20),
+  phone:       z.string().trim().min(7, "WhatsApp number is required").max(20),
+  email:       z.string().trim().email("Enter a valid email address").max(255),
 });
 
 // ── Image compression ─────────────────────────────────────────────────────────
@@ -58,7 +59,7 @@ function JoinPage() {
   const EMPTY = {
     name: "", age: "", location: "", height: "",
     dress_size: "", top_size: "", pant_size: "",
-    description: "", phone: "",
+    description: "", phone: "", email: "",
   };
   const [form, setForm]         = useState(EMPTY);
   const [images, setImages]     = useState<File[]>([]);
@@ -213,9 +214,18 @@ function JoinPage() {
                     <input required maxLength={80} className={inputCls} placeholder="e.g. Johannesburg" {...f("location")} />
                   </div>
                 </div>
-                <div>
-                  <label className={labelCls}>Phone Number <span className="normal-case text-white/40 tracking-normal">(WhatsApp &amp; calls)</span></label>
-                  <input required maxLength={20} className={inputCls} placeholder="+27 60 000 0000" {...f("phone")} />
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className={labelCls}>
+                      WhatsApp Number
+                      <span className="normal-case text-white/40 tracking-normal ml-1">(calls too)</span>
+                    </label>
+                    <input required maxLength={20} className={inputCls} placeholder="+27 60 000 0000" {...f("phone")} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Email Address</label>
+                    <input required type="email" maxLength={255} className={inputCls} placeholder="you@email.com" {...f("email")} />
+                  </div>
                 </div>
               </div>
             </div>

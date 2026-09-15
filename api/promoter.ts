@@ -62,6 +62,7 @@ export default async function handler(req: any, res: any) {
     pant_size:   fields.pant_size   || null,
     description: fields.description || null,
     phone:       fields.phone       || null,
+    email:       fields.email       || null,
     image_1_url: imageUrls[0]       || null,
     image_2_url: imageUrls[1]       || null,
     image_3_url: imageUrls[2]       || null,

@@ -262,11 +262,23 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
     setSaving(false);
   }
 
+  // Build contact action links
+  const waNumber = (promo.phone ?? "").replace(/\D/g, "");
+  const waText   = encodeURIComponent(
+    `Hi ${promo.name ?? "there"}! 🎉 Your OnCue Marketing promoter application has been approved. We'd love to have you on the team — please reply so we can discuss next steps.`
+  );
+  const waHref   = `https://wa.me/${waNumber}?text=${waText}`;
+
+  const emailSubject = encodeURIComponent("Your OnCue Marketing Application — Approved!");
+  const emailBody    = encodeURIComponent(
+    `Hi ${promo.name ?? "there"},\n\nCongratulations! We're pleased to let you know that your application to join the OnCue Marketing promoter team has been approved.\n\nWe'll be in touch with more details about upcoming activations.\n\nWarm regards,\nOnCue Marketing Team`
+  );
+  const emailHref = `mailto:${promo.email ?? ""}?subject=${emailSubject}&body=${emailBody}`;
+
   const details: [string, string][] = [
-    ["Age",        promo.age       ?? "—"],
-    ["Location",   promo.location  ?? "—"],
-    ["Phone",      promo.phone     ?? "—"],
-    ["Height",     promo.height    ?? "—"],
+    ["Age",        promo.age        ?? "—"],
+    ["Location",   promo.location   ?? "—"],
+    ["Height",     promo.height     ?? "—"],
     ["Dress Size", promo.dress_size ?? "—"],
     ["Top Size",   promo.top_size   ?? "—"],
     ["Pant Size",  promo.pant_size  ?? "—"],
@@ -283,6 +295,35 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
             <p className="text-white/50 text-xs mt-1">{promo.location} · Age {promo.age}</p>
           </div>
           <button onClick={onClose} className="text-white/50 hover:text-white transition p-1"><X size={18} /></button>
+        </div>
+
+        {/* Contact details — WhatsApp & Email clearly separated */}
+        <div className="bg-white/5 border border-white/10 divide-y divide-white/5">
+          {promo.phone && (
+            <a
+              href={`https://wa.me/${waNumber}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-between px-4 py-3 group hover:bg-white/5 transition"
+            >
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">WhatsApp / Call</p>
+                <p className="text-sm text-white font-semibold">{promo.phone}</p>
+              </div>
+              <span className="text-[10px] uppercase tracking-widest text-green-400 group-hover:text-green-300 font-bold">Open ↗</span>
+            </a>
+          )}
+          {promo.email && (
+            <a
+              href={`mailto:${promo.email}`}
+              className="flex items-center justify-between px-4 py-3 group hover:bg-white/5 transition"
+            >
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">Email</p>
+                <p className="text-sm text-white font-semibold break-all">{promo.email}</p>
+              </div>
+              <span className="text-[10px] uppercase tracking-widest text-[var(--color-gold)] group-hover:text-white font-bold">Open ↗</span>
+            </a>
+          )}
         </div>
 
         {/* Status buttons */}
@@ -303,6 +344,35 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
             </button>
           ))}
         </div>
+
+        {/* Quick-contact buttons — only show when approved */}
+        {promo.status === "approved" && (
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Notify applicant</p>
+            <div className="flex gap-2">
+              {promo.phone && (
+                <a
+                  href={waHref}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#25D366] text-black font-black text-xs uppercase tracking-widest hover:brightness-110 transition"
+                >
+                  💬 WhatsApp
+                </a>
+              )}
+              {promo.email && (
+                <a
+                  href={emailHref}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--color-gold)] text-black font-black text-xs uppercase tracking-widest hover:brightness-110 transition"
+                >
+                  ✉ Email
+                </a>
+              )}
+            </div>
+            <p className="text-[10px] text-white/30 leading-relaxed">
+              Opens WhatsApp / your email client with a pre-written message you can edit before sending.
+            </p>
+          </div>
+        )}
 
         {/* Photos */}
         {images.length > 0 && (
@@ -740,7 +810,8 @@ export default function AdminDashboard() {
                           >
                             <div className="px-4 py-4">
                               <p className="text-sm font-bold text-gray-900 group-hover:text-[#b8621a] transition truncate">{p.name}</p>
-                              <p className="text-xs text-gray-400 mt-0.5 truncate">{p.phone}</p>
+                              {p.phone && <p className="text-xs text-green-700 mt-0.5 truncate">📱 {p.phone}</p>}
+                              {p.email && <p className="text-xs text-gray-400 truncate">✉ {p.email}</p>}
                             </div>
                             <div className="px-4 py-4 flex items-center text-sm text-gray-700">{p.age ?? "—"}</div>
                             <div className="px-4 py-4 flex items-center text-sm text-gray-700 truncate">{p.location ?? "—"}</div>
