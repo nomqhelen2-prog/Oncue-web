@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 import { z } from "zod";
 import { ArrowUpRight, MessageCircle, Mail, Instagram, MapPin, Loader2 } from "lucide-react";
@@ -7,82 +8,65 @@ import { images } from "./assets/images";
 
 export default ContactPage;
 
-// ─── EmailJS config (values come from .env.local / Vercel env vars) ──────────
+// ─── EmailJS config ───────────────────────────────────────────────────────────
 const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  as string;
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
 const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  as string;
-// ─────────────────────────────────────────────────────────────────────────────
 
-const schema = z.object({
+// ─── Schemas ──────────────────────────────────────────────────────────────────
+const bizSchema = z.object({
   name:    z.string().trim().min(1, "Name is required").max(120),
   email:   z.string().trim().email("Enter a valid email").max(255),
   message: z.string().trim().min(1, "Message is required").max(2000),
 });
 
-// ─── Rate limiting: max 3 submissions per hour ────────────────────────────────
-const RATE_LIMIT_KEY   = "oncue_form_submissions";
-const RATE_LIMIT_MAX   = 3;
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in ms
+// ─── Rate limiting ────────────────────────────────────────────────────────────
+const RATE_LIMIT_KEY    = "oncue_form_submissions";
+const RATE_LIMIT_MAX    = 3;
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000;
 
 function checkRateLimit(): { allowed: boolean; waitMinutes?: number } {
   const raw = localStorage.getItem(RATE_LIMIT_KEY);
   const now = Date.now();
   const timestamps: number[] = raw ? JSON.parse(raw) : [];
-
-  // Keep only submissions within the last hour
   const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW);
-
   if (recent.length >= RATE_LIMIT_MAX) {
     const oldest = Math.min(...recent);
     const waitMs = RATE_LIMIT_WINDOW - (now - oldest);
-    const waitMinutes = Math.ceil(waitMs / 60000);
-    return { allowed: false, waitMinutes };
+    return { allowed: false, waitMinutes: Math.ceil(waitMs / 60000) };
   }
-
-  // Record this submission
   recent.push(now);
   localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(recent));
   return { allowed: true };
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
+const inputCls =
+  "w-full bg-transparent border-b border-white/20 py-3 focus:outline-none focus:border-[var(--color-gold)] text-white placeholder:text-white/30";
+const labelCls = "block text-xs uppercase tracking-widest text-white/80 mb-2";
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 function ContactPage() {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [form, setForm]     = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [error, setError]   = useState<string | null>(null);
+  const bizRef = useRef<HTMLFormElement>(null);
 
-  async function onSubmit(e: React.FormEvent) {
+  const [bizForm, setBizForm]     = useState({ name: "", email: "", message: "" });
+  const [bizStatus, setBizStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [bizError, setBizError]   = useState<string | null>(null);
+
+  async function onBizSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-
-    // Rate limit check
+    setBizError(null);
     const { allowed, waitMinutes } = checkRateLimit();
-    if (!allowed) {
-      setError(`Too many submissions. Please wait ${waitMinutes} minute${waitMinutes === 1 ? "" : "s"} before trying again.`);
-      return;
-    }
-
-    const parsed = schema.safeParse(form);
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Invalid input");
-      return;
-    }
-
-    setStatus("loading");
-
+    if (!allowed) { setBizError(`Too many submissions. Please wait ${waitMinutes} minute${waitMinutes === 1 ? "" : "s"}.`); return; }
+    const parsed = bizSchema.safeParse(bizForm);
+    if (!parsed.success) { setBizError(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
+    setBizStatus("loading");
     try {
-      await emailjs.sendForm(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        formRef.current!,
-        EMAILJS_PUBLIC_KEY,
-      );
-      setStatus("success");
-      setForm({ name: "", email: "", message: "" });
+      await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, bizRef.current!, EMAILJS_PUBLIC_KEY);
+      setBizStatus("success");
+      setBizForm({ name: "", email: "", message: "" });
     } catch {
-      setStatus("error");
-      setError("Could not send your message. Please try again or email us directly.");
+      setBizStatus("error");
+      setBizError("Could not send your message. Please try again or email us directly.");
     }
   }
 
@@ -95,6 +79,8 @@ function ContactPage() {
 
   return (
     <div className="bg-black text-white">
+
+      {/* ── Hero ── */}
       <section className="relative border-b border-white/10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-12 gap-10 items-center">
           <div className="md:col-span-7 relative">
@@ -116,8 +102,9 @@ function ContactPage() {
         </div>
       </section>
 
+      {/* ── Business enquiry ── */}
       <section className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-12 gap-12">
-        {/* Contact channels */}
+        {/* Channels */}
         <div className="md:col-span-5 space-y-8">
           {channels.map((c) => (
             <a
@@ -142,75 +129,72 @@ function ContactPage() {
           ))}
         </div>
 
-        {/* Contact form */}
-        <form
-          ref={formRef}
-          onSubmit={onSubmit}
-          className="md:col-span-7 border border-white/15 p-8 md:p-10 space-y-6"
-        >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wide leading-tight break-words">
-            Connect With Us
+        {/* Biz form */}
+        <form ref={bizRef} onSubmit={onBizSubmit} className="md:col-span-7 border border-white/15 p-8 md:p-10 space-y-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wide leading-tight">
+            Partner With Us
           </h2>
+          <p className="text-white/50 text-sm">
+            Brands, agencies, and event organisers — tell us about your next activation.
+          </p>
 
           <div>
-            <label className="block text-xs uppercase tracking-widest text-white/80 mb-2">Name</label>
-            <input
-              required
-              name="from_name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              maxLength={120}
-              className="w-full bg-transparent border-b border-white/20 py-3 focus:outline-none focus:border-[var(--color-gold)] text-white"
-              placeholder="Your full name"
-            />
+            <label className={labelCls}>Company / Name</label>
+            <input required name="from_name" value={bizForm.name}
+              onChange={(e) => setBizForm({ ...bizForm, name: e.target.value })}
+              maxLength={120} className={inputCls} placeholder="Your name or brand" />
           </div>
-
           <div>
-            <label className="block text-xs uppercase tracking-widest text-white/80 mb-2">Email</label>
-            <input
-              required
-              type="email"
-              name="from_email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              maxLength={255}
-              className="w-full bg-transparent border-b border-white/20 py-3 focus:outline-none focus:border-[var(--color-gold)] text-white"
-              placeholder="you@brand.com"
-            />
+            <label className={labelCls}>Email</label>
+            <input required type="email" name="from_email" value={bizForm.email}
+              onChange={(e) => setBizForm({ ...bizForm, email: e.target.value })}
+              maxLength={255} className={inputCls} placeholder="you@brand.com" />
           </div>
-
           <div>
-            <label className="block text-xs uppercase tracking-widest text-white/80 mb-2">Message</label>
-            <textarea
-              required
-              name="message"
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              maxLength={2000}
-              rows={5}
-              className="w-full bg-transparent border-b border-white/20 py-3 focus:outline-none focus:border-[var(--color-gold)] text-white resize-none"
-              placeholder="Tell us about your brand and activation goals"
-            />
+            <label className={labelCls}>Tell us about your project</label>
+            <textarea required name="message" value={bizForm.message}
+              onChange={(e) => setBizForm({ ...bizForm, message: e.target.value })}
+              maxLength={2000} rows={5} className={`${inputCls} resize-none`}
+              placeholder="Tell us about your brand and activation goals" />
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          {status === "success" && (
+          {bizError && <p className="text-red-400 text-sm">{bizError}</p>}
+          {bizStatus === "success" && (
             <p className="text-[var(--color-gold)] text-sm font-bold uppercase tracking-widest">
               Thanks — we'll be in touch shortly.
             </p>
           )}
-
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="inline-flex items-center gap-2 bg-[var(--color-gold)] text-black px-8 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-60"
-          >
-            {status === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            Submit Enquiry
+          <button type="submit" disabled={bizStatus === "loading"}
+            className="inline-flex items-center gap-2 bg-[var(--color-gold)] text-black px-8 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-60">
+            {bizStatus === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            Send Enquiry
           </button>
         </form>
       </section>
+
+      {/* ── Join the Team CTA ── */}
+      <section className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-[var(--color-gold)] mb-4">Promoters</p>
+            <h2 className="text-4xl sm:text-5xl font-black uppercase leading-[0.9] mb-6">
+              Want to Join<br />the Team?
+            </h2>
+            <p className="text-white/50 text-base leading-relaxed max-w-md">
+              We're always looking for talented promoters and brand ambassadors across JHB, CPT, and DBN. Apply on our dedicated page — we'll review your application and be in touch.
+            </p>
+          </div>
+          <div className="flex md:justify-end">
+            <Link
+              to="/join"
+              className="inline-flex items-center gap-3 bg-[var(--color-gold)] text-black px-10 py-5 font-black uppercase tracking-widest text-sm hover:bg-white transition"
+            >
+              Apply Now <ArrowUpRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

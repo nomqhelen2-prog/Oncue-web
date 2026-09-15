@@ -8,6 +8,7 @@ import AboutPage from './about'
 import ServicesPage from './services'
 import CollaborationsPage from './collaborations'
 import ContactPage from './contact'
+import JoinPage from './join'
 import StaffInvoicePage from './staff-invoice'
 import AdminLogin from './admin/login'
 import AdminDashboard from './admin/dashboard'
@@ -36,6 +37,7 @@ function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/collaborations" element={<CollaborationsPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/join" element={<JoinPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
           </Routes>

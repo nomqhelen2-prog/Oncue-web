@@ -426,13 +426,21 @@ export default function StaffInvoicePage() {
                   <input className={inputCls} type="number" min="0" step="0.01" value={data.dailyRate} onChange={e => upd({ dailyRate: e.target.value })} placeholder="e.g. 800" />
                 </Field>
                 <Field label="Total Days Worked">
-                  <RadioGrid options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]} value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "" })} cols={4} />
+                  <RadioGrid options={["1 Day","2 Days","3 Days","4 Days","5 Days","6 Days","7 Days","Other"]} value={data.daysWorked} onChange={v => upd({ daysWorked: v, daysOtherValue: "", dayDates: [] })} cols={4} />
                   {data.daysWorked === "Other" && (
                     <div className="mt-3">
                       <input className={inputCls} type="number" min="1" value={data.daysOtherValue} onChange={e => upd({ daysOtherValue: e.target.value })} placeholder="Enter number of days" />
                     </div>
                   )}
                 </Field>
+                {dayCount > 0 && Array.from({ length: dayCount }, (_, i) => (
+                  <div key={i} className="border border-white/15 bg-black/20 p-6 mb-2">
+                    <p className="text-[var(--color-gold)] text-xs uppercase tracking-widest font-bold mb-4">Day {i + 1}</p>
+                    <Field label="Date" hint="e.g. 13/09/2026">
+                      <input className={inputCls} type="text" value={data.dayDates[i] ?? ""} onChange={e => updDay("dayDates", i, e.target.value)} placeholder="e.g. 13/09/2026" />
+                    </Field>
+                  </div>
+                ))}
               </>
             )}
 

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase, type Invoice } from "../lib/supabase";
+import { supabase, type Invoice, type PromoterApplication } from "../lib/supabase";
 import {
-  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu, Trash2, Download, Settings,
+  LogOut, CheckCircle, Clock, Search, ChevronDown, ChevronUp, X, FileText, Menu, Trash2, Download, Settings, Users,
 } from "lucide-react";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -245,6 +245,125 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
   );
 }
 
+// ── Promoter drawer ───────────────────────────────────────────────────────────
+function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
+  promo: PromoterApplication;
+  onClose: () => void;
+  onStatusChange: (id: string, status: PromoterApplication["status"]) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [notes, setNotes]         = useState(promo.admin_notes ?? "");
+  const [savingNotes, setSaving]  = useState(false);
+  const images = [promo.image_1_url, promo.image_2_url, promo.image_3_url, promo.image_4_url].filter(Boolean) as string[];
+
+  async function saveNotes() {
+    setSaving(true);
+    await supabase.from("promoter_applications").update({ admin_notes: notes }).eq("id", promo.id);
+    setSaving(false);
+  }
+
+  const details: [string, string][] = [
+    ["Age",        promo.age       ?? "—"],
+    ["Location",   promo.location  ?? "—"],
+    ["Phone",      promo.phone     ?? "—"],
+    ["Height",     promo.height    ?? "—"],
+    ["Dress Size", promo.dress_size ?? "—"],
+    ["Top Size",   promo.top_size   ?? "—"],
+    ["Pant Size",  promo.pant_size  ?? "—"],
+    ["Applied",    new Date(promo.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" })],
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-[#0f0f0f] w-full max-w-md h-full overflow-y-auto border-l border-white/10 p-8 flex flex-col gap-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-xl font-black uppercase tracking-tight text-white">{promo.name}</h2>
+            <p className="text-white/50 text-xs mt-1">{promo.location} · Age {promo.age}</p>
+          </div>
+          <button onClick={onClose} className="text-white/50 hover:text-white transition p-1"><X size={18} /></button>
+        </div>
+
+        {/* Status buttons */}
+        <div className="flex gap-2">
+          {(["pending", "approved", "rejected"] as const).map(s => (
+            <button
+              key={s}
+              onClick={() => onStatusChange(promo.id, s)}
+              className={`flex-1 py-2 text-xs font-black uppercase tracking-widest transition border ${
+                promo.status === s
+                  ? s === "approved" ? "bg-green-600 border-green-600 text-white"
+                    : s === "rejected" ? "bg-red-700 border-red-700 text-white"
+                    : "bg-amber-500 border-amber-500 text-black"
+                  : "border-white/20 text-white/50 hover:border-white/50 hover:text-white"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {/* Photos */}
+        {images.length > 0 && (
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/60 mb-3 font-bold">Photos</p>
+            <div className="grid grid-cols-2 gap-2">
+              {images.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                  <img src={url} alt={`Photo ${i + 1}`} className="w-full aspect-square object-cover hover:opacity-80 transition" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Details */}
+        <div className="divide-y divide-white/5">
+          {details.map(([k, v]) => (
+            <div key={k} className="flex justify-between gap-4 py-2.5">
+              <span className="text-[11px] uppercase tracking-widest text-white/50 flex-shrink-0">{k}</span>
+              <span className="text-sm text-white text-right font-medium">{v}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* About */}
+        {promo.description && (
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/60 mb-2 font-bold">About</p>
+            <p className="text-sm text-white/80 leading-relaxed whitespace-pre-wrap">{promo.description}</p>
+          </div>
+        )}
+
+        {/* Admin notes */}
+        <div>
+          <label className="block text-[11px] uppercase tracking-[0.2em] text-white/60 mb-2 font-bold">Admin Notes</label>
+          <textarea
+            value={notes} onChange={e => setNotes(e.target.value)} rows={3}
+            placeholder="Add internal notes…"
+            className="w-full bg-white/5 border border-white/10 p-3 text-white text-sm focus:outline-none focus:border-white/30 resize-none placeholder:text-white/30"
+          />
+          <button
+            onClick={saveNotes} disabled={savingNotes}
+            className="mt-2 text-xs uppercase tracking-widest text-[var(--color-gold)] hover:text-white transition disabled:opacity-40 font-bold"
+          >
+            {savingNotes ? "Saving…" : "Save Notes"}
+          </button>
+        </div>
+
+        {/* Delete */}
+        <button
+          onClick={() => { onClose(); onDelete(promo.id); }}
+          className="flex items-center gap-2 text-red-400 hover:text-red-300 text-xs uppercase tracking-widest transition py-1 font-bold"
+        >
+          <Trash2 size={13} /> Delete Application
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Stat card ─────────────────────────────────────────────────────────────────
 function StatCard({ label, value, sub, accent }: {
   label: string; value: string; sub?: string; accent?: string;
@@ -261,7 +380,8 @@ function StatCard({ label, value, sub, accent }: {
 type NavItem = { id: string; label: string; icon: React.ReactNode };
 
 const NAV: NavItem[] = [
-  { id: "submissions", label: "Submissions", icon: <FileText size={17} /> },
+  { id: "submissions", label: "Submissions",  icon: <FileText size={17} /> },
+  { id: "promoters",   label: "Promoters",    icon: <Users    size={17} /> },
 ];
 
 // ── CSV export ────────────────────────────────────────────────────────────────
@@ -328,9 +448,15 @@ export default function AdminDashboard() {
   const [sortDesc, setSortDesc]         = useState(true);
   const [adminEmail, setAdminEmail]     = useState("");
   const [adminName, setAdminName]       = useState("");
-  const [activeNav]                     = useState("submissions");
+  const [activeNav, setActiveNav]       = useState("submissions");
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [monthFilter, setMonthFilter]   = useState<string>("all"); // "all" or "YYYY-MM"
+
+  // Promoters
+  const [promoters, setPromoters]           = useState<PromoterApplication[]>([]);
+  const [promoLoading, setPromoLoading]     = useState(false);
+  const [selectedPromo, setSelectedPromo]   = useState<PromoterApplication | null>(null);
+  const [promoSearch, setPromoSearch]       = useState("");
 
   // Auth guard + get admin name
   useEffect(() => {
@@ -345,6 +471,33 @@ export default function AdminDashboard() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (activeNav === "promoters" && promoters.length === 0) fetchPromoters();
+  }, [activeNav]);
+
+  async function fetchPromoters() {
+    setPromoLoading(true);
+    const { data } = await supabase
+      .from("promoter_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setPromoters(data ?? []);
+    setPromoLoading(false);
+  }
+
+  async function updatePromoStatus(id: string, status: PromoterApplication["status"]) {
+    await supabase.from("promoter_applications").update({ status }).eq("id", id);
+    setPromoters(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+    setSelectedPromo(prev => prev?.id === id ? { ...prev, status } : prev);
+  }
+
+  async function deletePromo(id: string) {
+    if (!confirm("Delete this application? This cannot be undone.")) return;
+    await supabase.from("promoter_applications").delete().eq("id", id);
+    setPromoters(prev => prev.filter(p => p.id !== id));
+    if (selectedPromo?.id === id) setSelectedPromo(null);
+  }
 
   useEffect(() => {
     fetchInvoices();
@@ -445,7 +598,7 @@ export default function AdminDashboard() {
         {NAV.map(item => (
           <button
             key={item.id}
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => { setActiveNav(item.id); setSidebarOpen(false); }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold tracking-wide transition text-left ${
               activeNav === item.id
                 ? "bg-[var(--color-gold)] text-black"
@@ -535,6 +688,103 @@ export default function AdminDashboard() {
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-8 pb-16 pt-4 sm:pt-6 space-y-4 sm:space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
 
+          {/* ── Promoters section ── */}
+          {activeNav === "promoters" && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-3 items-center justify-between">
+                <h2 className="text-base font-black text-gray-900">Promoter Applications</h2>
+                <div className="flex gap-3 items-center">
+                  <div className="relative">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text" placeholder="Search name or city…" value={promoSearch}
+                      onChange={e => setPromoSearch(e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[var(--color-gold)] w-52"
+                    />
+                  </div>
+                  <button onClick={fetchPromoters} className="px-3 py-2 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition">
+                    Refresh
+                  </button>
+                </div>
+              </div>
+
+              {promoLoading ? (
+                <p className="text-gray-400 text-sm py-16 text-center">Loading applications…</p>
+              ) : promoters.length === 0 ? (
+                <div className="py-20 text-center bg-white border border-gray-100">
+                  <Users size={32} className="mx-auto text-gray-200 mb-3" />
+                  <p className="text-gray-400 text-sm">No applications yet.</p>
+                </div>
+              ) : (
+                <div className="bg-white border border-gray-100 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <div style={{ minWidth: 700 }}>
+                      <div className="grid grid-cols-[180px_100px_140px_110px_120px_48px] border-b border-gray-100 bg-gray-50">
+                        {["Name", "Age", "Location", "Applied", "Status", ""].map(h => (
+                          <div key={h} className="px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-gray-500 font-bold">{h}</div>
+                        ))}
+                      </div>
+                      {promoters
+                        .filter(p => {
+                          if (!promoSearch) return true;
+                          const q = promoSearch.toLowerCase();
+                          return (p.name ?? "").toLowerCase().includes(q) || (p.location ?? "").toLowerCase().includes(q);
+                        })
+                        .map((p, idx) => (
+                          <div
+                            key={p.id}
+                            onClick={() => setSelectedPromo(p)}
+                            className={`grid grid-cols-[180px_100px_140px_110px_120px_48px] border-b border-gray-50 last:border-0 hover:bg-amber-50/60 cursor-pointer transition group ${
+                              idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                            }`}
+                          >
+                            <div className="px-4 py-4">
+                              <p className="text-sm font-bold text-gray-900 group-hover:text-[#b8621a] transition truncate">{p.name}</p>
+                              <p className="text-xs text-gray-400 mt-0.5 truncate">{p.phone}</p>
+                            </div>
+                            <div className="px-4 py-4 flex items-center text-sm text-gray-700">{p.age ?? "—"}</div>
+                            <div className="px-4 py-4 flex items-center text-sm text-gray-700 truncate">{p.location ?? "—"}</div>
+                            <div className="px-4 py-4 flex items-center text-sm text-gray-700 whitespace-nowrap">
+                              {new Date(p.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}
+                            </div>
+                            <div className="px-4 py-4 flex items-center">
+                              <span className={`text-xs font-bold uppercase tracking-wide px-2 py-1 ${
+                                p.status === "approved"  ? "text-green-700 bg-green-100" :
+                                p.status === "rejected"  ? "text-red-700 bg-red-100" :
+                                "text-amber-700 bg-amber-100"
+                              }`}>{p.status}</span>
+                            </div>
+                            <div className="flex items-center justify-center">
+                              <button
+                                onClick={e => { e.stopPropagation(); deletePromo(p.id); }}
+                                className="opacity-0 group-hover:opacity-100 transition text-gray-300 hover:text-red-500 p-1"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+                    <p className="text-xs text-gray-400">{promoters.length} application{promoters.length !== 1 ? "s" : ""}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Promoter detail drawer */}
+              {selectedPromo && (
+                <PromoterDrawer
+                  promo={selectedPromo}
+                  onClose={() => setSelectedPromo(null)}
+                  onStatusChange={updatePromoStatus}
+                  onDelete={deletePromo}
+                />
+              )}
+            </div>
+          )}
+
+          {activeNav !== "promoters" && (<>
           {/* Stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <StatCard
@@ -720,6 +970,7 @@ export default function AdminDashboard() {
           </div>{/* end overflow-x-auto */}
           </div>{/* end table card */}
 
+          </>)}
         </div>
       </div>
 

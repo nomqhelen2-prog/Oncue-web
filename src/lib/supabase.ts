@@ -6,6 +6,26 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY as string
 );
 
+export type PromoterApplication = {
+  id: string;
+  created_at: string;
+  name: string;
+  age: string | null;
+  location: string | null;
+  height: string | null;
+  dress_size: string | null;
+  top_size: string | null;
+  pant_size: string | null;
+  description: string | null;
+  phone: string | null;
+  image_1_url: string | null;
+  image_2_url: string | null;
+  image_3_url: string | null;
+  image_4_url: string | null;
+  status: "pending" | "approved" | "rejected";
+  admin_notes: string | null;
+};
+
 export type Invoice = {
   id: string;
   created_at: string;
