@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { z } from "zod";
 import { Loader2, X, Plus } from "lucide-react";
-import { supabase } from "./lib/supabase";
 
 export default JoinPage;
 
@@ -39,21 +38,14 @@ async function compressImage(file: File, maxPx = 900, quality = 0.75): Promise<B
   });
 }
 
-async function uploadImages(files: File[]): Promise<string[]> {
-  const urls: string[] = [];
-  for (const file of files) {
-    const compressed = await compressImage(file);
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-    const { data, error } = await supabase.storage
-      .from("promoter-images")
-      .upload(filename, compressed, { contentType: "image/jpeg", upsert: false });
-    if (error) throw new Error(`Image upload failed: ${error.message}`);
-    const { data: { publicUrl } } = supabase.storage
-      .from("promoter-images")
-      .getPublicUrl(data.path);
-    urls.push(publicUrl);
-  }
-  return urls;
+// Convert a Blob to a base64 data URL so we can send it through the API
+async function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
@@ -116,17 +108,21 @@ function JoinPage() {
 
     const parsed = schema.safeParse(form);
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
-    if (images.filter(Boolean).length < 4) { setError("Please add all 4 photos before submitting."); return; }
+    const validImages = images.filter(Boolean);
+    if (validImages.length < 4) { setError("Please add all 4 photos before submitting."); return; }
 
     setStatus("uploading");
-    setProgress("Compressing and uploading photos…");
+    setProgress("Compressing photos…");
 
-    let imageUrls: string[];
+    // Compress client-side, then encode to base64 and send via the API.
+    // The server uploads to Supabase Storage with the service key — no RLS needed.
+    let imageData: string[];
     try {
-      imageUrls = await uploadImages(images.filter(Boolean));
-    } catch (err: any) {
+      const compressed = await Promise.all(validImages.map(f => compressImage(f)));
+      imageData = await Promise.all(compressed.map(b => blobToBase64(b)));
+    } catch {
       setStatus("error");
-      setError("Photo upload failed — please check your connection and try again.");
+      setError("Could not process your photos — please try different images.");
       return;
     }
 
@@ -137,7 +133,7 @@ function JoinPage() {
       const res = await fetch("/api/promoter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: { ...form, images: imageUrls } }),
+        body: JSON.stringify({ fields: { ...form, images: imageData } }),
       });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
@@ -158,9 +154,9 @@ function JoinPage() {
   return (
     <div className="bg-black text-white min-h-screen">
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        {/* Background image — object-top keeps heads in frame */}
+      {/* Hero — tall section so text sits below the girls' faces */}
+      <section className="relative overflow-hidden flex flex-col justify-end" style={{ minHeight: "90vh" }}>
+        {/* Background image */}
         <img
           src="https://sjqncrtrprldnmfg.public.blob.vercel-storage.com/DUSSE%20X%20NOSTRA-55.jpeg"
           alt=""
@@ -169,19 +165,19 @@ function JoinPage() {
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-top"
         />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/65" />
-        {/* Fade to black at the bottom so form section blends in */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, #000 100%)" }} />
+        {/* Very light glass tint over the whole image */}
+        <div className="absolute inset-0 bg-black/20" />
+        {/* Bottom fade — starts at 65% so faces stay clear, fades to black for text */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 65%, rgba(0,0,0,0.92) 100%)" }} />
 
-        {/* Content */}
-        <div className="relative z-10 px-6 py-28 max-w-7xl mx-auto">
+        {/* Text pinned to the very bottom */}
+        <div className="relative z-10 px-6 pb-16 max-w-7xl mx-auto w-full">
           <p className="text-xs uppercase tracking-widest text-[var(--color-gold)] mb-4">Promoters</p>
           <h1 className="text-5xl sm:text-7xl font-black uppercase leading-[0.9] mb-6">
             Join the<br />
             <span className="text-[var(--color-gold)]">Team</span>
           </h1>
-          <p className="text-white/70 max-w-xl text-base leading-relaxed">
+          <p className="text-white/80 max-w-xl text-base leading-relaxed">
             OnCue Marketing works with brand ambassadors and promoters across Johannesburg, Cape Town, and Durban.
             Fill in the form below and we'll be in touch if you're a good fit.
           </p>

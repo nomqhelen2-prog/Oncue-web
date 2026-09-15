@@ -240,16 +240,16 @@ function Index() {
 
       {/* ── Contact Section ── */}
       <section id="home-contact" className="panel max-w-6xl mx-auto py-24 px-6">
-        <div className="bg-white/8 border border-white/10 p-8 md:p-12 text-center" style={{ background: "linear-gradient(135deg, #2a2a2a 0%, #333 100%)" }}>
-          <h2 className="text-3xl md:text-5xl font-black mb-4 uppercase text-white">
+        <div className="p-8 md:p-12 text-center" style={{ background: "linear-gradient(135deg, #b8922a 0%, #c9a84c 60%, #b8922a 100%)" }}>
+          <h2 className="text-3xl md:text-5xl font-black mb-4 uppercase text-black">
             Connect with us
           </h2>
-          <p className="text-white text-lg mb-8">
+          <p className="text-black/70 text-lg mb-8">
             Partner with us | Join our promoter team
           </p>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent("oncue:open-modal"))}
-            className="inline-block bg-[var(--color-gold)] text-black px-8 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition"
+            className="inline-block bg-black text-white px-8 py-4 font-black uppercase tracking-widest text-sm hover:bg-white hover:text-black transition"
           >
             Contact Us Now
           </button>

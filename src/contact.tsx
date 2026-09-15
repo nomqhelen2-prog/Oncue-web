@@ -188,7 +188,7 @@ function ContactPage() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, #000 100%)" }} />
 
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-40 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <p className="text-xs uppercase tracking-widest text-[var(--color-gold)] mb-4">Promoters</p>
             <h2 className="text-4xl sm:text-5xl font-black uppercase leading-[0.9] mb-6">

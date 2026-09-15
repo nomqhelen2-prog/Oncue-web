@@ -1,17 +1,55 @@
 import { createClient } from "@supabase/supabase-js";
 
+/** Upload a base64 data-URL to Supabase Storage using the service key. */
+async function uploadBase64(
+  supabase: ReturnType<typeof createClient>,
+  dataUrl: string,
+  index: number
+): Promise<string> {
+  // dataUrl format: "data:image/jpeg;base64,<data>"
+  const commaIdx = dataUrl.indexOf(",");
+  if (commaIdx === -1) throw new Error(`Image ${index + 1}: invalid data URL`);
+
+  const meta        = dataUrl.slice(0, commaIdx);          // "data:image/jpeg;base64"
+  const base64      = dataUrl.slice(commaIdx + 1);
+  const contentType = meta.match(/:(.*?);/)?.[1] ?? "image/jpeg";
+  const buffer      = Buffer.from(base64, "base64");
+  const filename    = `${Date.now()}-${Math.random().toString(36).slice(2)}-${index}.jpg`;
+
+  const { data, error } = await supabase.storage
+    .from("promoter-images")
+    .upload(filename, buffer, { contentType, upsert: false });
+
+  if (error) throw new Error(`Image ${index + 1} upload failed: ${error.message}`);
+
+  const { data: urlData } = supabase.storage
+    .from("promoter-images")
+    .getPublicUrl(data.path);
+
+  return urlData.publicUrl;
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { fields } = req.body;
+  const { fields } = req.body ?? {};
   if (!fields) return res.status(400).json({ error: "Missing fields" });
 
-  const supabase = createClient(
+  const supabaseClient = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!
   );
 
-  const images: string[] = fields.images ?? [];
+  // Upload images server-side using the service key (bypasses all RLS)
+  const rawImages: string[] = fields.images ?? [];
+  let imageUrls: string[];
+  try {
+    imageUrls = await Promise.all(
+      rawImages.map((img, i) => uploadBase64(supabaseClient, img, i))
+    );
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message ?? "Image upload failed" });
+  }
 
   const record = {
     name:        fields.name        || null,
@@ -23,26 +61,29 @@ export default async function handler(req: any, res: any) {
     pant_size:   fields.pant_size   || null,
     description: fields.description || null,
     phone:       fields.phone       || null,
-    image_1_url: images[0]          || null,
-    image_2_url: images[1]          || null,
-    image_3_url: images[2]          || null,
-    image_4_url: images[3]          || null,
+    image_1_url: imageUrls[0]       || null,
+    image_2_url: imageUrls[1]       || null,
+    image_3_url: imageUrls[2]       || null,
+    image_4_url: imageUrls[3]       || null,
     status:      "pending",
   };
 
-  const { error } = await supabase.from("promoter_applications").insert([record]);
-  if (error) return res.status(500).json({ error: error.message });
+  const { error: dbError } = await supabaseClient
+    .from("promoter_applications")
+    .insert([record]);
+
+  if (dbError) return res.status(500).json({ error: dbError.message });
 
   // Email notification — non-blocking
   try {
-    const apiKey    = process.env.RESEND_API_KEY;
+    const apiKey     = process.env.RESEND_API_KEY;
     const adminEmail = process.env.ADMIN_EMAIL;
-    const from      = process.env.RESEND_FROM ?? "onboarding@resend.dev";
+    const from       = process.env.RESEND_FROM ?? "onboarding@resend.dev";
 
     if (apiKey && adminEmail) {
-      const name     = fields.name ?? "Unknown";
+      const name     = fields.name     ?? "Unknown";
       const location = fields.location ?? "—";
-      const age      = fields.age ?? "—";
+      const age      = fields.age      ?? "—";
 
       const baseUrl = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
