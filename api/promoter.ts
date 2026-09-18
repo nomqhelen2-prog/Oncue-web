@@ -113,11 +113,6 @@ export default async function handler(req: any, res: any) {
               <p style="color:#888;font-size:12px;margin:0 0 8px">About</p>
               <p style="font-size:14px;line-height:1.6;margin:0">${(fields.description ?? "").replace(/\n/g, "<br>")}</p>
             </div>
-            <div style="margin-top:24px">
-              <a href="${baseUrl}/admin" style="display:inline-block;background:#c9a84c;color:#000;padding:12px 24px;font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:12px;text-decoration:none">
-                View in Dashboard →
-              </a>
-            </div>
           </div>
         </div>`;
 

@@ -254,7 +254,11 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
 }) {
   const [notes, setNotes]         = useState(promo.admin_notes ?? "");
   const [savingNotes, setSaving]  = useState(false);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const images = [promo.image_1_url, promo.image_2_url, promo.image_3_url, promo.image_4_url].filter(Boolean) as string[];
+
+  function lightboxPrev() { setLightboxIdx(i => i != null ? (i - 1 + images.length) % images.length : 0); }
+  function lightboxNext() { setLightboxIdx(i => i != null ? (i + 1) % images.length : 0); }
 
   async function saveNotes() {
     setSaving(true);
@@ -438,12 +442,79 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
         {/* Photos */}
         {images.length > 0 && (
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/60 mb-3 font-bold">Photos</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/60 mb-3 font-bold">Photos — tap to view</p>
             <div className="grid grid-cols-2 gap-2">
               {images.map((url, i) => (
-                <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                  <img src={url} alt={`Photo ${i + 1}`} className="w-full aspect-square object-cover hover:opacity-80 transition" />
-                </a>
+                <button
+                  key={i}
+                  onClick={() => setLightboxIdx(i)}
+                  className="relative aspect-square overflow-hidden group focus:outline-none"
+                >
+                  <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover transition group-hover:scale-105 duration-300" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
+                    <span className="text-white text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition">View</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Lightbox */}
+        {lightboxIdx !== null && (
+          <div
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+            onClick={() => setLightboxIdx(null)}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setLightboxIdx(null)}
+              className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10"
+            >
+              <X size={28} />
+            </button>
+
+            {/* Counter */}
+            <p className="absolute top-5 left-1/2 -translate-x-1/2 text-white/50 text-xs uppercase tracking-widest font-bold">
+              {lightboxIdx + 1} / {images.length}
+            </p>
+
+            {/* Prev */}
+            {images.length > 1 && (
+              <button
+                onClick={e => { e.stopPropagation(); lightboxPrev(); }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white p-3 transition z-10"
+              >
+                ‹
+              </button>
+            )}
+
+            {/* Image */}
+            <img
+              src={images[lightboxIdx]}
+              alt={`Photo ${lightboxIdx + 1}`}
+              onClick={e => e.stopPropagation()}
+              className="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl"
+            />
+
+            {/* Next */}
+            {images.length > 1 && (
+              <button
+                onClick={e => { e.stopPropagation(); lightboxNext(); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white p-3 transition z-10"
+              >
+                ›
+              </button>
+            )}
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
+                  className={`w-2 h-2 rounded-full transition ${i === lightboxIdx ? "bg-white" : "bg-white/30"}`}
+                />
               ))}
             </div>
           </div>
@@ -625,7 +696,8 @@ export default function AdminDashboard() {
 
   async function deletePromo(id: string) {
     if (!confirm("Delete this application? This cannot be undone.")) return;
-    await supabase.from("promoter_applications").delete().eq("id", id);
+    const { error } = await supabase.from("promoter_applications").delete().eq("id", id);
+    if (error) { alert(`Delete failed: ${error.message}`); return; }
     setPromoters(prev => prev.filter(p => p.id !== id));
     if (selectedPromo?.id === id) setSelectedPromo(null);
   }
@@ -634,7 +706,13 @@ export default function AdminDashboard() {
     fetchInvoices();
     const channel = supabase
       .channel("invoices")
-      .on("postgres_changes", { event: "*", schema: "public", table: "invoices" }, fetchInvoices)
+      // INSERT/UPDATE → re-fetch so we get computed fields (labour_total etc.)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "invoices" }, fetchInvoices)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "invoices" }, fetchInvoices)
+      // DELETE → remove from state directly so the record never reappears
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "invoices" }, (payload: any) => {
+        setInvoices(prev => prev.filter(inv => inv.id !== payload.old.id));
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
@@ -659,7 +737,8 @@ export default function AdminDashboard() {
 
   async function deleteInvoice(id: string) {
     if (!confirm("Delete this submission? This cannot be undone.")) return;
-    await supabase.from("invoices").delete().eq("id", id);
+    const { error } = await supabase.from("invoices").delete().eq("id", id);
+    if (error) { alert(`Delete failed: ${error.message}`); return; }
     setInvoices(prev => prev.filter(inv => inv.id !== id));
     if (selected?.id === id) setSelected(null);
   }
@@ -889,7 +968,7 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-center">
                               <button
                                 onClick={e => { e.stopPropagation(); deletePromo(p.id); }}
-                                className="opacity-0 group-hover:opacity-100 transition text-gray-300 hover:text-red-500 p-1"
+                                className="text-red-400 hover:text-red-600 transition p-1"
                               >
                                 <Trash2 size={14} />
                               </button>
@@ -1080,7 +1159,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-center">
                       <button
                         onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}
-                        className="opacity-0 group-hover:opacity-100 transition text-gray-300 hover:text-red-500 p-1"
+                        className="text-red-400 hover:text-red-600 transition p-1"
                         title="Delete submission"
                       >
                         <Trash2 size={14} />
