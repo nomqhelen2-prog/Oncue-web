@@ -49,6 +49,13 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
     fuel_amount:     inv.fuel_amount     != null ? String(inv.fuel_amount)     : "",
     pre_pay_amount:  inv.pre_pay_amount  != null ? String(inv.pre_pay_amount)  : "",
     total_owed:      inv.total_owed      != null ? String(inv.total_owed)      : "",
+    day_1_hours: inv.day_1_hours != null ? String(inv.day_1_hours) : "",
+    day_2_hours: inv.day_2_hours != null ? String(inv.day_2_hours) : "",
+    day_3_hours: inv.day_3_hours != null ? String(inv.day_3_hours) : "",
+    day_4_hours: inv.day_4_hours != null ? String(inv.day_4_hours) : "",
+    day_5_hours: inv.day_5_hours != null ? String(inv.day_5_hours) : "",
+    day_6_hours: inv.day_6_hours != null ? String(inv.day_6_hours) : "",
+    day_7_hours: inv.day_7_hours != null ? String(inv.day_7_hours) : "",
   });
 
   function upd(k: keyof typeof edit, v: string) { setEdit(e => ({ ...e, [k]: v })); }
@@ -79,6 +86,13 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
       fuel_amount:     edit.fuel_amount    ? parseFloat(edit.fuel_amount)     : null,
       pre_pay_amount:  edit.pre_pay_amount ? parseFloat(edit.pre_pay_amount)  : null,
       total_owed:      edit.total_owed     ? parseFloat(edit.total_owed)      : null,
+      day_1_hours: edit.day_1_hours !== "" ? parseFloat(edit.day_1_hours) : null,
+      day_2_hours: edit.day_2_hours !== "" ? parseFloat(edit.day_2_hours) : null,
+      day_3_hours: edit.day_3_hours !== "" ? parseFloat(edit.day_3_hours) : null,
+      day_4_hours: edit.day_4_hours !== "" ? parseFloat(edit.day_4_hours) : null,
+      day_5_hours: edit.day_5_hours !== "" ? parseFloat(edit.day_5_hours) : null,
+      day_6_hours: edit.day_6_hours !== "" ? parseFloat(edit.day_6_hours) : null,
+      day_7_hours: edit.day_7_hours !== "" ? parseFloat(edit.day_7_hours) : null,
     } as any;
     await supabase.from("invoices").update(patch).eq("id", inv.id);
     onUpdate(inv.id, patch);
@@ -104,13 +118,10 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
     inv.setup_rate   ? ["Setup Rate", fmt(inv.setup_rate)]   : ["", ""],
     ["Venues Worked", inv.stores_worked],
     ["Labour Total", fmt(inv.labour_total)],
-    ["Bought Items", inv.bought_items],
-    inv.bought_items === "yes" ? ["Purchase Details", inv.purchase_details] : ["", ""],
+    inv.bought_items === "yes" ? ["Items Bought", inv.purchase_details] : ["", ""],
     inv.bought_items === "yes" ? ["Purchase Amount", fmt(inv.purchase_amount)] : ["", ""],
-    ["Fuel Contribution", inv.fuel_contribution],
     inv.fuel_contribution === "yes" ? ["Fuel Amount", fmt(inv.fuel_amount)] : ["", ""],
-    ["Pre-Pay Received", inv.pre_pay],
-    inv.pre_pay === "yes" ? ["Pre-Pay Amount", fmt(inv.pre_pay_amount)] : ["", ""],
+    inv.pre_pay === "yes" ? ["Pre-Pay Deduction", fmt(inv.pre_pay_amount)] : ["", ""],
     ["Total Owed", fmt(inv.total_owed)],
     ["Submission Date", fmtDate(inv.submission_date || inv.created_at)],
     ["Agreed to T&Cs", inv.agreed_to_terms ? "Yes" : "No"],
@@ -200,6 +211,39 @@ function DetailDrawer({ inv, onClose, onTogglePaid, onDelete, onUpdate }: {
                 />
               </div>
             ))}
+
+            {/* Day hours — only show days that have data */}
+            {[1,2,3,4,5,6,7].some(i => (inv as any)[`day_${i}_hours`] != null) && (
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 mb-3 font-bold border-t border-white/10 pt-4">Day Hours</p>
+                <div className="flex flex-col gap-3">
+                  {[1,2,3,4,5,6,7].map(i => {
+                    const key = `day_${i}_hours` as keyof typeof edit;
+                    const invHours = (inv as any)[`day_${i}_hours`];
+                    if (invHours == null && edit[key] === "") return null;
+                    const rate = (inv as any)[`day_${i}_rate`] as number | null;
+                    const date = (inv as any)[`day_${i}_date`] as string | null;
+                    return (
+                      <div key={i}>
+                        <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">
+                          Day {i}{date ? ` (${date})` : ""}{rate ? ` @ R${rate}/hr` : ""}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          className={inCls}
+                          value={edit[key]}
+                          onChange={e => upd(key, e.target.value)}
+                          placeholder="hours"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <button
               onClick={saveEdits}
               disabled={saving}
@@ -270,7 +314,7 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
   // account logged in there, not the personal phone app.
   const waNumber = (promo.phone ?? "").replace(/\D/g, "");
   const waText   = encodeURIComponent(
-    `Hi ${promo.name ?? "there"}! 🎉 Your OnCue Marketing promoter application has been approved. We'd love to have you on the team — please reply so we can discuss next steps.`
+    `Hi ${promo.name ?? "there"}! Your OnCue Marketing promoter application has been approved. We would love to have you on the team, please reply so we can discuss next steps.`
   );
   const waHref = `https://web.whatsapp.com/send?phone=${waNumber}&text=${waText}`;
 
@@ -280,20 +324,17 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
     `Hi ${promo.name ?? "there"},\n\nCongratulations! We are pleased to let you know that your application to join the OnCue Marketing promoter team has been approved.\n\nWe will be in touch with more details about upcoming activations.\n\nWarm regards,\nOnCue Marketing Team`;
   const emailHref = `mailto:${promo.email ?? ""}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
-  const [emailCopied, setEmailCopied] = useState(false);
-  function copyEmail() {
-    if (!promo.email) return;
-    navigator.clipboard.writeText(promo.email).then(() => {
-      setEmailCopied(true);
-      setTimeout(() => setEmailCopied(false), 2000);
-    });
-  }
   function openEmail() {
-    // window.open forces the browser to try the mailto handler
-    window.open(emailHref, "_self");
+    const a = document.createElement("a");
+    a.href = emailHref;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   const details: [string, string][] = [
+    ["WhatsApp",   promo.phone      ?? "—"],
+    ["Email",      promo.email      ?? "—"],
     ["Age",        promo.age        ?? "—"],
     ["Location",   promo.location   ?? "—"],
     ["Height",     promo.height     ?? "—"],
@@ -314,55 +355,6 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
             <p className="text-white/50 text-xs mt-1">{promo.location} · Age {promo.age}</p>
           </div>
           <button onClick={onClose} className="text-white/50 hover:text-white transition p-1"><X size={18} /></button>
-        </div>
-
-        {/* Contact details — WhatsApp & Email clearly separated */}
-        <div className="bg-white/5 border border-white/10 divide-y divide-white/5">
-          {promo.phone ? (
-            <a
-              href={`https://web.whatsapp.com/send?phone=${waNumber}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-between px-4 py-3 group hover:bg-white/5 transition"
-            >
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">WhatsApp / Call</p>
-                <p className="text-sm text-white font-semibold">{promo.phone}</p>
-              </div>
-              <span className="text-[10px] uppercase tracking-widest text-green-400 group-hover:text-green-300 font-bold">Message ↗</span>
-            </a>
-          ) : (
-            <div className="px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">WhatsApp / Call</p>
-              <p className="text-sm text-white/30 italic">No number on file</p>
-            </div>
-          )}
-          {promo.email ? (
-            <div className="flex items-center justify-between px-4 py-3 gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">Email</p>
-                <p className="text-sm text-white font-semibold break-all">{promo.email}</p>
-              </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button
-                  onClick={openEmail}
-                  className="text-[10px] uppercase tracking-widest text-[var(--color-gold)] hover:text-white font-bold transition whitespace-nowrap"
-                >
-                  Open ↗
-                </button>
-                <button
-                  onClick={copyEmail}
-                  className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white font-bold transition whitespace-nowrap"
-                >
-                  {emailCopied ? "Copied ✓" : "Copy"}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-0.5">Email</p>
-              <p className="text-sm text-white/30 italic">No email on file</p>
-            </div>
-          )}
         </div>
 
         {/* Status buttons */}
@@ -578,7 +570,7 @@ function StatCard({ label, value, sub, accent }: {
 type NavItem = { id: string; label: string; icon: React.ReactNode };
 
 const NAV: NavItem[] = [
-  { id: "submissions", label: "Submissions",  icon: <FileText size={17} /> },
+  { id: "submissions", label: "Invoices",      icon: <FileText size={17} /> },
   { id: "promoters",   label: "Promoters",    icon: <Users    size={17} /> },
 ];
 
@@ -894,11 +886,15 @@ export default function AdminDashboard() {
             >
               <Menu size={22} />
             </button>
-            <div>
-              <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-black/60 font-bold">Invoice Dashboard</p>
-              <h1 className="text-xl sm:text-3xl font-black text-black mt-0.5 leading-tight">
-                Welcome back, {adminName || "Admin"}
-              </h1>
+            <h1 className="text-xl sm:text-2xl font-black text-black tracking-tight flex-1">Dashboard</h1>
+            {/* User pill */}
+            <div className="flex items-center gap-2 bg-black/10 rounded-full px-3 py-1.5">
+              <div className="w-6 h-6 rounded-full bg-black/20 flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-black/70">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-black/70 hidden sm:inline">{adminName || "Admin"}</span>
             </div>
           </div>
         </header>
@@ -1032,7 +1028,7 @@ export default function AdminDashboard() {
 
             {/* Table header / filters */}
             <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap gap-3 items-center">
-              <h2 className="text-base font-black text-gray-900 mr-auto">All Submissions</h2>
+              <h2 className="text-base font-black text-gray-900 mr-auto">All Invoices</h2>
 
               {/* Search */}
               <div className="relative">
@@ -1119,10 +1115,10 @@ export default function AdminDashboard() {
 
             {/* Rows */}
             {loading ? (
-              <p className="text-gray-400 text-sm py-16 text-center">Loading submissions…</p>
+              <p className="text-gray-400 text-sm py-16 text-center">Loading invoices…</p>
             ) : filtered.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-gray-400 text-sm mb-2">No submissions match your filters.</p>
+                <p className="text-gray-400 text-sm mb-2">No invoices match your filters.</p>
                 <p className="text-gray-300 text-xs">Try adjusting the week or status filter.</p>
               </div>
             ) : (
