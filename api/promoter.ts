@@ -87,10 +87,6 @@ export default async function handler(req: any, res: any) {
       const location = fields.location ?? "—";
       const age      = fields.age      ?? "—";
 
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000";
-
       const html = `
         <div style="font-family:sans-serif;max-width:540px;margin:0 auto;color:#111">
           <div style="background:#c9a84c;padding:24px 32px">

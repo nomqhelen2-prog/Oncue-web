@@ -304,6 +304,7 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
   ];
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-[#0f0f0f] w-full max-w-md h-full overflow-y-auto border-l border-white/10 p-8 flex flex-col gap-6">
@@ -460,66 +461,6 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
           </div>
         )}
 
-        {/* Lightbox */}
-        {lightboxIdx !== null && (
-          <div
-            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
-            onClick={() => setLightboxIdx(null)}
-          >
-            {/* Close */}
-            <button
-              onClick={() => setLightboxIdx(null)}
-              className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10"
-            >
-              <X size={28} />
-            </button>
-
-            {/* Counter */}
-            <p className="absolute top-5 left-1/2 -translate-x-1/2 text-white/50 text-xs uppercase tracking-widest font-bold">
-              {lightboxIdx + 1} / {images.length}
-            </p>
-
-            {/* Prev */}
-            {images.length > 1 && (
-              <button
-                onClick={e => { e.stopPropagation(); lightboxPrev(); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white p-3 transition z-10"
-              >
-                ‹
-              </button>
-            )}
-
-            {/* Image */}
-            <img
-              src={images[lightboxIdx]}
-              alt={`Photo ${lightboxIdx + 1}`}
-              onClick={e => e.stopPropagation()}
-              className="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl"
-            />
-
-            {/* Next */}
-            {images.length > 1 && (
-              <button
-                onClick={e => { e.stopPropagation(); lightboxNext(); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white p-3 transition z-10"
-              >
-                ›
-              </button>
-            )}
-
-            {/* Dot indicators */}
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
-                  className={`w-2 h-2 rounded-full transition ${i === lightboxIdx ? "bg-white" : "bg-white/30"}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Details */}
         <div className="divide-y divide-white/5">
           {details.map(([k, v]) => (
@@ -563,6 +504,61 @@ function PromoterDrawer({ promo, onClose, onStatusChange, onDelete }: {
         </button>
       </div>
     </div>
+
+    {/* Lightbox — rendered outside the drawer so fixed positioning works correctly */}
+    {lightboxIdx !== null && (
+      <div
+        className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center"
+        onClick={() => setLightboxIdx(null)}
+      >
+        <button
+          onClick={() => setLightboxIdx(null)}
+          className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10"
+        >
+          <X size={28} />
+        </button>
+
+        <p className="absolute top-5 left-1/2 -translate-x-1/2 text-white/50 text-xs uppercase tracking-widest font-bold">
+          {lightboxIdx + 1} / {images.length}
+        </p>
+
+        {images.length > 1 && (
+          <button
+            onClick={e => { e.stopPropagation(); lightboxPrev(); }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white text-3xl px-4 py-3 transition z-10"
+          >
+            ‹
+          </button>
+        )}
+
+        <img
+          src={images[lightboxIdx]}
+          alt={`Photo ${lightboxIdx + 1}`}
+          onClick={e => e.stopPropagation()}
+          className="max-h-[88vh] max-w-[92vw] object-contain shadow-2xl"
+        />
+
+        {images.length > 1 && (
+          <button
+            onClick={e => { e.stopPropagation(); lightboxNext(); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white text-3xl px-4 py-3 transition z-10"
+          >
+            ›
+          </button>
+        )}
+
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
+              className={`w-2.5 h-2.5 rounded-full transition ${i === lightboxIdx ? "bg-white" : "bg-white/30"}`}
+            />
+          ))}
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -698,6 +694,12 @@ export default function AdminDashboard() {
     if (!confirm("Delete this application? This cannot be undone.")) return;
     const { error } = await supabase.from("promoter_applications").delete().eq("id", id);
     if (error) { alert(`Delete failed: ${error.message}`); return; }
+    // Verify actually deleted — Supabase RLS can silently block without returning an error
+    const { data: stillExists } = await supabase.from("promoter_applications").select("id").eq("id", id).maybeSingle();
+    if (stillExists) {
+      alert("Delete blocked by database policy. Run this in Supabase SQL Editor:\n\nCREATE POLICY \"auth_delete_promoter\" ON promoter_applications FOR DELETE TO authenticated USING (true);");
+      return;
+    }
     setPromoters(prev => prev.filter(p => p.id !== id));
     if (selectedPromo?.id === id) setSelectedPromo(null);
   }
@@ -739,6 +741,12 @@ export default function AdminDashboard() {
     if (!confirm("Delete this submission? This cannot be undone.")) return;
     const { error } = await supabase.from("invoices").delete().eq("id", id);
     if (error) { alert(`Delete failed: ${error.message}`); return; }
+    // Verify actually deleted — Supabase RLS can silently block without returning an error
+    const { data: stillExists } = await supabase.from("invoices").select("id").eq("id", id).maybeSingle();
+    if (stillExists) {
+      alert("Delete blocked by database policy. Run this in Supabase SQL Editor:\n\nCREATE POLICY \"auth_delete_invoices\" ON invoices FOR DELETE TO authenticated USING (true);");
+      return;
+    }
     setInvoices(prev => prev.filter(inv => inv.id !== id));
     if (selected?.id === id) setSelected(null);
   }
