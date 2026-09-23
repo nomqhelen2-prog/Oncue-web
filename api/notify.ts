@@ -48,6 +48,7 @@ export default async function handler(req: any, res: any) {
           <tr><td style="padding:10px 0;border-bottom:1px solid #222;color:#999;">WhatsApp Group</td><td style="padding:10px 0;border-bottom:1px solid #222;">${group}</td></tr>
           <tr><td style="padding:10px 0;color:#999;">Total Owed</td><td style="padding:10px 0;color:#c9a84c;font-weight:700;font-size:18px;">R ${amount}</td></tr>
         </table>
+        <a href="https://oncuemarketing.co.za/admin" style="display:inline-block;margin-top:24px;background:#c9a84c;color:#000;padding:12px 24px;text-decoration:none;font-weight:700;border-radius:4px;font-size:14px;letter-spacing:1px;">VIEW IN DASHBOARD →</a>
         <p style="color:#555;font-size:12px;margin-top:32px;">OnCue Marketing · oncuemarketing.co.za</p>
       </div>
     `;
