@@ -135,7 +135,7 @@ function ContactPage() {
             Partner With Us
           </h2>
           <p className="text-white/50 text-sm">
-            Brands, agencies, and event organisers — tell us about your next activation.
+            Brands, agencies, and event organisers tell us about your next activation.
           </p>
 
           <div>
@@ -161,7 +161,7 @@ function ContactPage() {
           {bizError && <p className="text-red-400 text-sm">{bizError}</p>}
           {bizStatus === "success" && (
             <p className="text-[var(--color-gold)] text-sm font-bold uppercase tracking-widest">
-              Thanks — we'll be in touch shortly.
+              Thanks, we'll be in touch shortly.
             </p>
           )}
           <button type="submit" disabled={bizStatus === "loading"}
