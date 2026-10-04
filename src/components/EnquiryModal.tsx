@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 import { X, Loader2 } from "lucide-react";
 
@@ -80,13 +81,21 @@ export function EnquiryModal({ onClose }: { onClose: () => void }) {
               <p className="text-red-400 text-sm">Something went wrong. Please try again.</p>
             )}
 
-            <button
-              type="submit" disabled={status === "loading"}
-              className="bg-[var(--color-gold)] text-black px-10 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-60 flex items-center gap-3"
-            >
-              {status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-              Submit Enquiry
-            </button>
+            <div className="flex flex-wrap gap-3 items-center">
+              <button
+                type="submit" disabled={status === "loading"}
+                className="bg-[var(--color-gold)] text-black px-10 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-60 flex items-center gap-3"
+              >
+                {status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+                Submit Enquiry
+              </button>
+              <Link
+                to="/join"
+                className="border border-white/30 text-white px-8 py-4 font-black uppercase tracking-widest text-sm hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] transition"
+              >
+                Join as Promoter
+              </Link>
+            </div>
           </form>
         )}
       </div>
