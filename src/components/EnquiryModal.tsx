@@ -1,26 +1,14 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import emailjs from "@emailjs/browser";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, ArrowRight } from "lucide-react";
 
 const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  as string;
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
 const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  as string;
 
-
-function Field({ label, name, placeholder, type = "text", required = false }: {
-  label: string; name: string; placeholder: string; type?: string; required?: boolean;
-}) {
-  return (
-    <div>
-      <label className="block text-[11px] uppercase tracking-[0.2em] text-white/80 mb-3 font-bold">{label}</label>
-      <input
-        type={type} name={name} placeholder={placeholder} required={required}
-        className="w-full bg-transparent border-b border-white/30 pb-3 text-white text-sm focus:outline-none focus:border-white placeholder:text-white/40 transition-colors"
-      />
-    </div>
-  );
-}
+const inputCls = "w-full bg-white/10 border border-white/40 px-4 py-3 text-white text-sm focus:outline-none focus:border-[var(--color-gold)] placeholder:text-white/50 transition-colors";
+const labelCls = "block text-[11px] uppercase tracking-[0.2em] text-white/90 mb-2 font-bold";
 
 export function EnquiryModal({ onClose }: { onClose: () => void }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -30,11 +18,9 @@ export function EnquiryModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setStatus("loading");
     try {
-      // Build a combined message from all fields so existing EmailJS template still works
       const f = formRef.current!;
       const get = (n: string) => (f.elements.namedItem(n) as HTMLInputElement)?.value || "";
       (f.elements.namedItem("message") as HTMLInputElement).value = get("message_body");
-
       await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, f, EMAILJS_PUBLIC_KEY);
       setStatus("success");
     } catch {
@@ -44,60 +30,77 @@ export function EnquiryModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-black text-white w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/10 p-8 md:p-12 shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white transition"
-          aria-label="Close"
-        >
-          <X size={18} />
-        </button>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-black w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10">
 
-        <h2 className="text-lg font-black uppercase tracking-widest mb-8">Connect With Us</h2>
+        {/* Header */}
+        <div className="bg-[var(--color-gold)] px-8 py-6 relative text-center">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-black/60 font-bold mb-0.5">OnCue Marketing</p>
+          <h2 className="text-xl font-black uppercase tracking-tight text-black">Connect With Us</h2>
+          <button onClick={onClose} className="absolute top-1/2 -translate-y-1/2 right-5 text-black/50 hover:text-black transition" aria-label="Close">
+            <X size={20} />
+          </button>
+        </div>
 
-        {status === "success" ? (
-          <div className="text-center py-16">
-            <p className="text-[var(--color-gold)] text-xl font-black uppercase tracking-widest">
-              Thanks — we'll be in touch shortly.
-            </p>
-          </div>
-        ) : (
-          <form ref={formRef} onSubmit={onSubmit} className="space-y-8">
-            <Field label="Name"  name="from_name"  placeholder="Your full name"   required />
-            <Field label="Email" name="from_email" placeholder="you@brand.com" type="email" required />
-            <div>
-              <label className="block text-[11px] uppercase tracking-[0.2em] text-white/80 mb-3 font-bold">Message</label>
-              <textarea
-                name="message_body" rows={5} placeholder="Tell us about your brand and activation goals"
-                className="w-full bg-transparent border-b border-white/30 pb-3 text-white text-sm focus:outline-none focus:border-white resize-none placeholder:text-white/40 transition-colors"
-              />
+        {/* Body */}
+        <div className="px-8 py-8">
+          {status === "success" ? (
+            <div className="text-center py-12">
+              <p className="text-[var(--color-gold)] text-2xl font-black uppercase tracking-widest mb-2">✓</p>
+              <p className="text-white font-black uppercase tracking-widest text-base">Message sent!</p>
+              <p className="text-white/50 text-sm mt-2">We'll be in touch shortly.</p>
             </div>
+          ) : (
+            <form ref={formRef} onSubmit={onSubmit} className="space-y-5">
+              <div>
+                <label className={labelCls}>Name</label>
+                <input type="text" name="from_name" placeholder="Your full name" required className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Email</label>
+                <input type="email" name="from_email" placeholder="you@brand.com" required className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Message</label>
+                <textarea
+                  name="message_body" rows={4}
+                  placeholder="Tell us about your brand and activation goals"
+                  className={`${inputCls} resize-none`}
+                />
+              </div>
 
-            {/* Hidden field that gets populated on submit */}
-            <input type="hidden" name="message" />
+              <input type="hidden" name="message" />
 
-            {status === "error" && (
-              <p className="text-red-400 text-sm">Something went wrong. Please try again.</p>
-            )}
+              {status === "error" && (
+                <p className="text-red-500 text-sm">Something went wrong — please try again.</p>
+              )}
 
-            <div className="flex flex-wrap gap-3 items-center">
-              <button
-                type="submit" disabled={status === "loading"}
-                className="bg-[var(--color-gold)] text-black px-10 py-4 font-black uppercase tracking-widest text-sm hover:bg-white transition disabled:opacity-60 flex items-center gap-3"
-              >
-                {status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-                Submit Enquiry
-              </button>
-              <Link
-                to="/join"
-                className="border border-white/30 text-white px-8 py-4 font-black uppercase tracking-widest text-sm hover:border-[var(--color-gold)] hover:text-[var(--color-gold)] transition"
-              >
-                Join as Promoter
-              </Link>
-            </div>
-          </form>
-        )}
+              {/* Actions */}
+              <div className="pt-2 flex flex-col gap-3">
+                <button
+                  type="submit" disabled={status === "loading"}
+                  className="w-full bg-[var(--color-gold)] text-black py-4 font-black uppercase tracking-widest text-sm hover:brightness-105 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {status === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Submit Enquiry
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-white/30" />
+                  <span className="text-xs text-white/60 uppercase tracking-widest">or</span>
+                  <div className="flex-1 h-px bg-white/30" />
+                </div>
+
+                <Link
+                  to="/join"
+                  className="w-full bg-[var(--color-gold)] text-black py-4 font-black uppercase tracking-widest text-sm hover:brightness-105 transition flex items-center justify-center gap-2"
+                >
+                  Join as Promoter <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
